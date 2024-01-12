@@ -1,7 +1,7 @@
 // criarMapa
 var map = new L.Map('map', {
-    center: new L.LatLng(-7, -55),
-    zoom: 4,
+    center: new L.LatLng(-5.9, -36.7),
+    zoom: 8,
     attributionControl: true,
     zoomControl: false,
     minZoom: 0,
@@ -15,19 +15,46 @@ var baselayer = new L.TileLayer(basemaps[3]['tilelayer'], {
     attribution: basemaps[3]['attribution']
 });
 
+
+L.control.scale().addTo(map);
+
 map.addLayer(baselayer);
 
 const provider = new window.GeoSearch.OpenStreetMapProvider();
-const search = new GeoSearch.GeoSearchControl({
+const search = new window.GeoSearch.GeoSearchControl({
     provider: provider,
-    style: 'bar',
     updateMap: true,
     autoClose: true,
     searchLabel: 'Buscar Endereço',
 });
 
 map.addControl(search);
+$(".geosearch").addClass("active");
 // Fim criarMapa
+
+
+// localizacaoAtual
+const options = {
+    enableHighAccuracy: true,
+    timeout: 5000,
+    maximumAge: 0,
+};
+
+function success(pos) {
+    const crd = pos.coords;
+    var mak = drawnItems.addLayer(L.marker([crd.latitude, crd.longitude]));
+    map.setView([crd.latitude, crd.longitude], 18);
+}
+
+function error(err) {
+    console.warn(`ERROR(${err.code}): ${err.message}`);
+}
+
+function localAtual() {
+    navigator.geolocation.getCurrentPosition(success, error, options);
+}
+// Fim localizacaoAtual
+
 
 // mudarMapa
 $("#tipoMapa").on("change", "", function (e) {
@@ -40,25 +67,12 @@ $("#tipoMapa").on("change", "", function (e) {
     });
 
     map.addLayer(baselayer);
-
-    // var servidorapp = 'https://seia.idema.rn.gov.br/geoserver/';
-    // var cmds = {
-    //     "wmsLimites": L.tileLayer.betterWms(servidorapp + "wms", {
-    //         layers: 'idemarn:limites_municipais_rn',
-    //         format: 'image/png',
-    //         version: '1.3.0',
-    //         transparent: true,
-    //         name: 'Limites Municipais'
-    //     }),
-    // }
-    // map.addLayer(cmds["wmsLimites"]);
-
+    limites();
 });
 // Fim mudarMapa
 
 
 // Draw
-
 var custon1 = L.Icon.extend({
     options: {
         shadowUrl: null,
@@ -85,16 +99,13 @@ var drawControl = new L.Control.Draw({
     draw: {
         polygon: {
             icon: new custon2(),
-            allowIntersection: false,
+            allowIntersection: true,
             drawError: {
                 color: '#e1e100',
-                message: '<strong>Desenho do polígono não permitido!<strong> (allowIntersection: false)'
             },
             shapeOptions: {
                 color: '#bada55'
             }
-        },
-        marker: {
         },
         polyline: false,
         rectangle: false,
@@ -104,44 +115,124 @@ var drawControl = new L.Control.Draw({
     edit: {
         featureGroup: drawnItems,
     },
-    toolbar: {
-        buttons: {
-            polygon: 'Desenhar Polígonos',
-            marker: 'Draw a marker',
+});
+
+L.drawLocal = {
+    draw: {
+        toolbar: {
+            actions: {
+                title: 'Cancelar desenho',
+                text: 'Cancelar'
+            },
+            finish: {
+                title: 'Concluir desenho',
+                text: 'Concluir'
+            },
+            undo: {
+                title: 'Excluir último ponto desenhado',
+                text: 'Excluir último ponto'
+            },
+            buttons: {
+                polygon: 'Desenhar Polígono',
+                marker: 'Inserir Ponto',
+            }
+        },
+        handlers: {
+            circle: {
+                tooltip: {
+                    start: 'Clique e arraste para desenhar um círculo.'
+                },
+                radius: 'Raio'
+            },
+            circlemarker: {
+                tooltip: {
+                    start: 'Clique no mapa para colocar o marcador de círculo.'
+                }
+            },
+            marker: {
+                tooltip: {
+                    start: 'Clique no mapa para colocar o marcador.'
+                }
+            },
+            polygon: {
+                tooltip: {
+                    start: 'Clique para começar a desenhar.',
+                    cont: 'Clique para continuar desenhando.',
+                    end: 'Clique no primeiro ponto para fechar o desenho.'
+                }
+            },
+            polyline: {
+                error: '<strong>Erro: as bordas da forma não podem cruzar!</strong>',
+                tooltip: {
+                    start: 'Clique para começar a desenhar a linha.',
+                    cont: 'Clique para continuar desenhando a linha.',
+                    end: 'Clique no último ponto para terminar a linha.'
+                }
+            },
+            rectangle: {
+                tooltip: {
+                    start: 'Clique e arraste para desenhar um retângulo.'
+                }
+            },
+            simpleshape: {
+                tooltip: {
+                    end: 'Solte o mouse para terminar de desenhar.'
+                }
+            }
+        }
+    },
+    edit: {
+        toolbar: {
+            actions: {
+                save: {
+                    title: 'Salvar alterações',
+                    text: 'Salvar'
+                },
+                cancel: {
+                    title: 'Cancelar edição, descarta todas as alterações',
+                    text: 'Cancelar'
+                },
+                clearAll: {
+                    title: 'Limpar todas as camadas',
+                    text: 'Limpar tudo'
+                }
+            },
+            buttons: {
+                edit: 'Editae Camada',
+                editDisabled: 'Nenhuma camada para editar',
+                remove: 'Deletar Camada',
+                removeDisabled: 'Nenhuma camada para excluir'
+            }
+        },
+        handlers: {
+            edit: {
+                tooltip: {
+                    text: 'Arraste para editar.',
+                    subtext: 'Clique em cancelar para desfazer as alterações.'
+                }
+            },
+            remove: {
+                tooltip: {
+                    text: 'Clique em um recurso para removê-lo.'
+                }
+            }
         }
     }
-});
+}
 
-
-L.drawLocal.draw.toolbar.buttons.polygon = 'Desenhar Polígonos';
-L.drawLocal.draw.toolbar.buttons.marker = 'Desenhar Pontos';
-L.drawLocal.edit.toolbar.buttons.edit = 'Editar';
-L.drawLocal.edit.toolbar.actions.save.text = 'Salvar';
-L.drawLocal.edit.toolbar.actions.cancel.text = 'Cancelar';
-L.drawLocal.edit.toolbar.buttons.remove = 'Deletar';
-L.drawLocal.edit.toolbar.actions.clearAll.text = 'Limpar Todos';
 
 map.addControl(drawControl);
-
 map.on('draw:created', function (e) {
-    var type = e.layerType,
-        layer = e.layer;
-
-    if (type === 'marker') {
-        layer.bindPopup('A popup!');
-    }
-
-    drawnItems.addLayer(layer);
+    drawnItems.addLayer(e.layer);
 });
 
-// var servidorapp = 'https://seia.idema.rn.gov.br/geoserver/';
-// var cmds = {
-//     "wmsLimites": L.tileLayer.betterWms(servidorapp + "wms", {
-//         layers: 'idemarn:limites_municipais_rn',
-//         format: 'image/png',
-//         version: '1.3.0',
-//         transparent: true,
-//         name: 'Limites Municipais'
-//     }),
-// }
-// map.addLayer(cmds["wmsLimites"]);
+
+function limites() {
+    L.tileLayer.betterWms("https://seia.idema.rn.gov.br/geoserver/wcs", {
+        layers: 'idemarn:limites_municipais_rn',
+        format: 'image/png',
+        transparent: true,
+    }).addTo(map);
+}
+
+limites();

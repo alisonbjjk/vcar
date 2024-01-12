@@ -10,7 +10,7 @@
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet" />
     <style>
         .modal-personalizado {
-            min-width: 80%; // aqui vc pega a percentagem da sua tela
+            min-width: 80%;
             /* margin-left: 70; // aqui vc escolhe */
         }
 
@@ -34,7 +34,9 @@
     </div>
 
     <script>
-        $("#myModal").modal({ show: true });
+        $("#myModal").modal({
+            show: true
+        });
     </script>
 </body>
 

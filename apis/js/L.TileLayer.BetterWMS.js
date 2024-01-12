@@ -1,17 +1,13 @@
 L.TileLayer.BetterWMS = L.TileLayer.WMS.extend({
 
     onAdd: function (map) {
-        // Triggered when the layer is added to a map.
-        //   Register a click listener, then do all the upstream WMS things
         L.TileLayer.WMS.prototype.onAdd.call(this, map);
-        map.on('click', this.getFeatureInfo, this);
+        // map.on('click', this.getFeatureInfo, this);
     },
 
     onRemove: function (map) {
-        // Triggered when the layer is removed from a map.
-        //   Unregister a click listener, then do all the upstream WMS things
         L.TileLayer.WMS.prototype.onRemove.call(this, map);
-        map.off('click', this.getFeatureInfo, this);
+        // map.off('click', this.getFeatureInfo, this);
     },
 
     getFeatureInfo: function (evt) {

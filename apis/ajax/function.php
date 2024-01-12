@@ -1,4 +1,5 @@
 <?php
+header('Content-Type: text/html; charset=utf-8');
 
 use PHPMailer\PHPMailer\PHPMailer;
 
@@ -7,7 +8,7 @@ require_once("../phpmailer/smtp.php");
 require_once("../phpmailer/exception.php");
 require_once("../phpmailer/credenciais.php");
 
-function enviarEmail($email, $html = "")
+function enviarEmail($email, $data, $html = "")
 {
     $mail = new PHPMailer;
     $mail->Host = 'smtp.hostinger.com';
@@ -23,12 +24,11 @@ function enviarEmail($email, $html = "")
     $mail->addAddress($email);
 
     $mail->isHTML(true);
-    $mail->Subject = 'EQUIPE VCAR';
+    $mail->Subject = "EQUIPE VCAR {$data}";
     $mail->Body = "
     <h3>Recebemos sua solicitação, aguarde um prazo de até 24h para entrarmos em contato.</h3></br> 
     <h3>Atenciosamente, EQUIPE VCAR!</h3>
     ";
 
     return $mail->send();
-
 }

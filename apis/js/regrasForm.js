@@ -93,7 +93,11 @@ document.getElementById('file').addEventListener('change', function (e) {
             var kmlImport = toGeoJSON.kml(new DOMParser().parseFromString(fr.result, "text/xml"))
             var arr = kmlImport.features;
             for (var i = 0; i < arr.length; i++) {
-                drawnItems.addLayer(L.geoJSON(arr[i].geometry));
+                var geojsonLayers = drawnItems.addLayer(L.geoJSON(arr[i].geometry));
+                var bounds = geojsonLayers.getBounds()
+                map.fitBounds(bounds)
+                var center = bounds.getCenter()
+                map.panTo(center)
             }
         } else if (extFile == 'shp') {
             fr.readAsDataURL(e.target.files[0]);
@@ -101,7 +105,11 @@ document.getElementById('file').addEventListener('change', function (e) {
                 shp(fr.result).then(function (geojson) {
                     var arr = geojson.features;
                     for (var i = 0; i < arr.length; i++) {
-                        drawnItems.addLayer(L.geoJSON(arr[i].geometry));
+                        var geojsonLayers = drawnItems.addLayer(L.geoJSON(arr[i].geometry));
+                        var bounds = geojsonLayers.getBounds()
+                        map.fitBounds(bounds)
+                        var center = bounds.getCenter()
+                        map.panTo(center)
                     }
                 })
             };
@@ -180,3 +188,6 @@ function pesquisacep(valor) {
     }
 };
 // Fim BuscaCEP
+
+$('#telefone').mask('(99) 99999-9999')
+$('#cpf').mask('999.999.999-99')

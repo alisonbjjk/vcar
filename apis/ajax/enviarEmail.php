@@ -1,4 +1,5 @@
 <?php
+header('Content-Type: text/html; charset=utf-8');
 
 use PHPMailer\PHPMailer\PHPMailer;
 
@@ -20,6 +21,7 @@ $bairro = filter_input(INPUT_POST, 'bairro');
 $numero = filter_input(INPUT_POST, 'numero');
 $complemento = filter_input(INPUT_POST, 'complemento');
 $motivo = filter_input(INPUT_POST, 'motivo');
+$data = date('d/m/Y H:i:s');
 
 $mail = new PHPMailer;
 $mail->Host = 'smtp.hostinger.com';
@@ -33,33 +35,35 @@ $mail->Password = '';
 $mail->setFrom('contato@4four.tech', 'VCAR');
 $mail->addReplyTo($email, 'contato');
 
+
 if (isset($_FILES['file']) && $_FILES['file']['error'] == UPLOAD_ERR_OK) {
     $mail->addAttachment($_FILES['file']['tmp_name'], $_FILES['file']['name']);
 }
 
 $mail->addAddress('alisonbjjk@gmail.com');
 
+$mail->CharSet = 'UTF-8';
 $mail->isHTML(true);
-$mail->Subject = 'Novo Contato';
+$mail->Subject = "Nova Entrada de Formulário {$data}";
 $mail->Body = "
 <h2>Dados do novo Contato</h2></br>
 <h3>Nome: <strong>{$nome}</strong></h3></br>
 <h3>CPF: <strong>{$cpf}</strong></h3></br>
-<h3>email: <strong>{$email}</strong></h3></br>
+<h3>Email: <strong>{$email}</strong></h3></br>
 <h3>Telefone: <strong>{$telefone}</strong></h3></br>
 <h3>Cep: <strong>{$cep}</strong></h3></br>
-<h3>Cidade/UF: <strong>{$cidade}/{$uf}</strong></h3></br>
-<h3>Rua - Bairro - N&uacute;mero: <strong>{$rua} - {$bairro} - {$numero}</strong></h3></br>
+<h3>Cidade: <strong>{$cidade}/{$uf}</strong></h3></br>
+<h3>Endereço: <strong>{$rua} - {$bairro} - {$numero}</strong></h3></br>
 <h3>Complemento: <strong>{$complemento}</strong></h3></br>
 <h3>Motivo: <strong>{$motivo}</strong></h3></br>
 ";
 
-$enviar = enviarEmail($email);
+$enviar = enviarEmail($email, $data);
 
 if (!$mail->send()) {
     echo json_encode(['sucesso' => false, 'mensagem' => 'Erro inesperado! cod.1', 'log' => $mail->ErrorInfo]);
 } else if (!$enviar) {
-    echo json_encode(['sucesso' => false, 'mensagem' => 'Erro inesperado! cod.1', 'log' => $email->ErrorInfo]);
+    echo json_encode(['sucesso' => false, 'mensagem' => 'Erro inesperado! cod.2', 'log' => $email->ErrorInfo]);
 } else {
     echo json_encode(['sucesso' => true, 'mensagem' => 'Enviado com sucesso!', 'log' => 'Email enviado com sucesso.']);
 }
