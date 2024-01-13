@@ -8,8 +8,10 @@ require_once("../phpmailer/smtp.php");
 require_once("../phpmailer/exception.php");
 require_once("../phpmailer/credenciais.php");
 
+
 function enviarEmail($email, $data, $html = "")
 {
+
     $mail = new PHPMailer;
     $mail->Host = 'smtp.hostinger.com';
     $mail->isSMTP();
@@ -18,17 +20,18 @@ function enviarEmail($email, $data, $html = "")
     $mail->SMTPAuth = true;
     $mail->SMTPDebug = 0;
     $mail->Username = 'contato@4four.tech';
-    $mail->Password = '';
-    $mail->setFrom('contato@4four.tech', 'EQUIPE VCAR');
-    $mail->addReplyTo('contato@4four.tech', 'contato');
+    $mail->Password = 'SEDzz!SUYAE+h5*';
+    $mail->setFrom('contato@4four.tech', 'CONDIÇÕES AMBIENTAIS');
+    $mail->addReplyTo('condicoesambientais@gmail.com', 'CONDIÇÕES AMBIENTAIS');
     $mail->addAddress($email);
 
+    $mail->CharSet = 'UTF-8';
     $mail->isHTML(true);
-    $mail->Subject = "EQUIPE VCAR {$data}";
-    $mail->Body = "
-    <h3>Recebemos sua solicitação, aguarde um prazo de até 24h para entrarmos em contato.</h3></br> 
-    <h3>Atenciosamente, EQUIPE VCAR!</h3>
-    ";
+    $mail->Subject = "CONDIÇÕES AMBIENTAIS {$data}";
+
+    $body = file_get_contents("./mail.html");
+    $mail->Body = $body;
 
     return $mail->send();
+
 }

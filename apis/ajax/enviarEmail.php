@@ -31,20 +31,19 @@ $mail->SMTPSecure = 'ssl';
 $mail->SMTPAuth = true;
 $mail->SMTPDebug = 0;
 $mail->Username = 'contato@4four.tech';
-$mail->Password = '';
-$mail->setFrom('contato@4four.tech', 'VCAR');
+$mail->Password = 'SEDzz!SUYAE+h5*';
+$mail->setFrom('contato@4four.tech', 'contato');
 $mail->addReplyTo($email, 'contato');
-
 
 if (isset($_FILES['file']) && $_FILES['file']['error'] == UPLOAD_ERR_OK) {
     $mail->addAttachment($_FILES['file']['tmp_name'], $_FILES['file']['name']);
 }
 
-$mail->addAddress('alisonbjjk@gmail.com');
+$mail->addAddress('condicoesambientais@gmail.com');
 
 $mail->CharSet = 'UTF-8';
 $mail->isHTML(true);
-$mail->Subject = "Nova Entrada de Formulário {$data}";
+$mail->Subject = "Nova Entrada de FormulÃ¡rio {$data}";
 $mail->Body = "
 <h2>Dados do novo Contato</h2></br>
 <h3>Nome: <strong>{$nome}</strong></h3></br>
@@ -53,11 +52,10 @@ $mail->Body = "
 <h3>Telefone: <strong>{$telefone}</strong></h3></br>
 <h3>Cep: <strong>{$cep}</strong></h3></br>
 <h3>Cidade: <strong>{$cidade}/{$uf}</strong></h3></br>
-<h3>Endereço: <strong>{$rua} - {$bairro} - {$numero}</strong></h3></br>
+<h3>EndereÃ§o: <strong>{$rua} - {$bairro} - {$numero}</strong></h3></br>
 <h3>Complemento: <strong>{$complemento}</strong></h3></br>
 <h3>Motivo: <strong>{$motivo}</strong></h3></br>
 ";
-
 $enviar = enviarEmail($email, $data);
 
 if (!$mail->send()) {

@@ -5,8 +5,13 @@ $("#enviar").on("click", function () {
     var nome = $("#nome").val();
     var cpf = $("#cpf").val();
     var email = $("#email").val();
+    var termos = $('#check1').map(function (i, el) {
+        if ($(el).is(':checked')) {
+            return $(el).val()
+        }
+    }).get();
 
-    if (nome != '' || cpf != '' || email != '') {
+    if (nome != '' && cpf != '' && email != '' && termos.length == 1) {
         var collection = {
             "type": "FeatureCollection",
             "features": []
@@ -50,9 +55,11 @@ $("#enviar").on("click", function () {
             success: function (data, status, jqXHR) {
                 if (data.sucesso) {
                     Swal.fire({
-                        icon: 'success',
                         title: 'Sucesso!',
                         html: data.mensagem,
+                        imageUrl: '../apis/img/icon1.gif',
+                        imageHeight: 120,
+                        imageWidth: 120,
                     }).then((result) => {
                         location.reload()
                     })
