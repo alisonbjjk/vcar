@@ -21,7 +21,19 @@ $bairro = filter_input(INPUT_POST, 'bairro');
 $numero = filter_input(INPUT_POST, 'numero');
 $complemento = filter_input(INPUT_POST, 'complemento');
 $motivo = filter_input(INPUT_POST, 'motivo');
+date_default_timezone_set('America/Sao_Paulo');
 $data = date('d/m/Y H:i:s');
+
+$validaCaptcha = false;
+if (isset($_POST['g-recaptcha-response'])) {
+    $getResponse = "https://www.google.com/recaptcha/api/siteverify?secret=6LefpFApAAAAANBt_axCVIK1LeseNp_I_mw8-BbB&response={$_POST['g-recaptcha-response']}";
+    $GoogleResponse = (file_get_contents($getResponse));
+    $captcha = json_decode($GoogleResponse);
+    if ($captcha->success == false) {
+        echo json_encode(['sucesso' => false, 'mensagem' => 'Recaptcha não selecionado.']);
+        die();
+    }
+}
 
 $mail = new PHPMailer;
 $mail->Host = 'smtp.hostinger.com';
@@ -31,7 +43,7 @@ $mail->SMTPSecure = 'ssl';
 $mail->SMTPAuth = true;
 $mail->SMTPDebug = 0;
 $mail->Username = 'contato@4four.tech';
-$mail->Password = 'SEDzz!SUYAE+h5*';
+$mail->Password = '';
 $mail->setFrom('contato@4four.tech', 'contato');
 $mail->addReplyTo($email, 'contato');
 

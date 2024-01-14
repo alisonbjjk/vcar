@@ -20,7 +20,7 @@ function enviarEmail($email, $data, $html = "")
     $mail->SMTPAuth = true;
     $mail->SMTPDebug = 0;
     $mail->Username = 'contato@4four.tech';
-    $mail->Password = 'SEDzz!SUYAE+h5*';
+    $mail->Password = '';
     $mail->setFrom('contato@4four.tech', 'CONDIÇÕES AMBIENTAIS');
     $mail->addReplyTo('condicoesambientais@gmail.com', 'CONDIÇÕES AMBIENTAIS');
     $mail->addAddress($email);

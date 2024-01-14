@@ -30,6 +30,7 @@ $("#enviar").on("click", function () {
 
         if (collection.features.length == 0) {
             $("#enviar").attr("disabled", false);
+            grecaptcha.reset();
             Swal.fire({
                 icon: "error",
                 title: "Oops...",
@@ -61,7 +62,7 @@ $("#enviar").on("click", function () {
                         imageHeight: 120,
                         imageWidth: 120,
                     }).then((result) => {
-                        location.reload()
+                        window.location.reload(true)
                     })
                 }
                 else {
@@ -71,7 +72,7 @@ $("#enviar").on("click", function () {
                         title: "Oops...",
                         text: data.mensagem,
                     });
-                    console.log(data.log);
+                    grecaptcha.reset();
                 }
             }
         });
@@ -80,7 +81,7 @@ $("#enviar").on("click", function () {
         Swal.fire({
             icon: "error",
             title: "Oops...",
-            text: "Por favor, preencha todos os campos obrigatório!",
+            text: "Por favor, preencha todos os campos obrigatórios!",
         });
     }
 });
