@@ -31,7 +31,7 @@ $mail->SMTPSecure = 'ssl';
 $mail->SMTPAuth = true;
 $mail->SMTPDebug = 0;
 $mail->Username = 'contato@4four.tech';
-$mail->Password = 'SEDzz!SUYAE+h5*';
+$mail->Password = '';
 $mail->setFrom('contato@4four.tech', 'contato');
 $mail->addReplyTo($email, 'contato');
 
