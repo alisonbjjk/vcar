@@ -125,8 +125,8 @@
                                     <label for="tipo1" class="form-label text-uppercase">Tipo da camada</label>
                                     <select id="tipo1" class="form-select" aria-label="Default select example">
                                         <option selected disabled>SELECIONAR TIPO</option>
-                                        <option value="1">Aceiros</option>
-                                        <option value="1">Aerogeradires</option>
+                                        <option value="Aceiros">Aceiros</option>
+                                        <option value="Aerogeradires">Aerogeradires</option>
                                         <option value="2">ANM</option>
                                         <option value="3">APPs de Declividade</option>
                                         <option value="3">Imóveis</option>
@@ -199,7 +199,7 @@
     <script src="../apis/js/kmlToGeojson.js"></script>
     <script src="../apis/js/imporShp.js"></script>
     <script src="../apis/js/baseMapas.js"></script>
-    <script src="../apis/js/regrasMapa.js"></script>
+    <script src="./js/regrasMapa.js"></script>
     <script>
 
         function removeCamadas(camada) {
@@ -227,16 +227,16 @@
                     <label for="tipo${count}" class="form-label text-uppercase">Tipo da camada</label>
                     <select id="tipo${count}" class="form-select" aria-label="Default select example">
                         <option selected disabled>SELECIONAR TIPO</option>
-                        <option value="1">Aceiros</option>
-                        <option value="1">Aerogeradires</option>
-                        <option value="2">ANM</option>
-                        <option value="3">APPs de Declividade</option>
-                        <option value="3">Imóveis</option>
-                        <option value="3">Planilha - Imóveis CAR</option>
-                        <option value="3">DVFL</option>
-                        <option value="3">Estágio Inicial</option>
-                        <option value="3">Estágio Médio</option>
-                        <option value="3">Estágio Avançado</option>
+                        <option value="Aceiros">Aceiros</option>
+                        <option value="Aerogeradires">Aerogeradires</option>
+                        <option value="3">ANM</option>
+                        <option value="4">APPs de Declividade</option>
+                        <option value="5">Imóveis</option>
+                        <option value="6">Planilha - Imóveis CAR</option>
+                        <option value="7">DVFL</option>
+                        <option value="8">Estágio Inicial</option>
+                        <option value="9">Estágio Médio</option>
+                        <option value="10">Estágio Avançado</option>
                     </select>
                 </div>
                 <div class="col-5">
@@ -251,12 +251,11 @@
 
         // Inicio BuscaFile
         function abrirFiles(e, id) {
-
             var nome = $(`#nomeCamada${id}`).val();
             var tipo = $(`#tipo${id}`).val();
 
-            if (nome == '' || tipo == null) {
-                alert(`Inserir Nome e Tipo da Camada.\nErro: cod(${id}).`);
+            if (tipo == null) {
+                alert(`Inserir Tipo da Camada.\nErro: cod(${id}).`);
                 $(`#file${id}`).val(null);
                 return;
             }
@@ -271,6 +270,7 @@
                     var kmlImport = toGeoJSON.kml(new DOMParser().parseFromString(fr.result, "text/xml"));
                     var arr = kmlImport.features;
                     for (var i = 0; i < arr.length; i++) {
+                        arr[i].properties.tipo = tipo;
                         var geojsonLayers = drawnItems.addLayer(L.geoJSON(arr[i].geometry));
                         var bounds = geojsonLayers.getBounds();
                         map.fitBounds(bounds);
@@ -281,6 +281,7 @@
                     shp(fr.result).then(function (geojson) {
                         var arr = geojson.features;
                         for (var i = 0; i < arr.length; i++) {
+                            arr[i].properties.tipo = tipo;
                             var geojsonLayers = drawnItems.addLayer(L.geoJSON(arr[i].geometry));
                             var bounds = geojsonLayers.getBounds();
                             map.fitBounds(bounds);
