@@ -140,8 +140,8 @@
                                 <div class="col-5">
                                     <label for="file1" class="form-label text-uppercase">arquivos
                                         georeferenciados (.SHP e/ou .KML)</label>
-                                    <input onchange="abrirFiles(event, '1')" type="file" class="form-control" id="file1"
-                                        accept=".kml, .shp">
+                                    <input onchange="abrirFiles(event, '1', this.files[0])" type="file"
+                                        class="form-control" id="file1" accept=".kml, .zip">
                                 </div>
                             </div>
                         </div>
@@ -198,8 +198,12 @@
     <script src="https://norkart.github.io/Leaflet-MiniMap/Control.MiniMap.js" crossorigin="anonymous"></script>
     <script src="../apis/js/kmlToGeojson.js"></script>
     <script src="../apis/js/imporShp.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.6.0/jszip.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/shapefile@0.6.6/dist/shapefile.min.js"></script>
+
     <script src="../apis/js/baseMapas.js"></script>
-    <script src="./js/regrasMapa.js"></script>
+    <script src="./js/regrasMapa.js?1=1"></script>
     <script>
 
         function removeCamadas(camada) {
@@ -210,7 +214,6 @@
             var count = $("#camadas").attr('count')
             var count = parseInt(count) + 1;
             $("#camadas").attr('count', count);
-
 
             $("#camadas").append(`
             <div class="row justify-content-between border rounded p-3 pt-0 m-2" id="div-${count}" value="${count}">
@@ -242,7 +245,7 @@
                 <div class="col-5">
                     <label for="file${count}" class="form-label text-uppercase">arquivos
                         georeferenciados (.SHP e/ou .KML)</label>
-                    <input type="file" onchange="abrirFiles(event, '${count}')" class="form-control" id="file${count}" accept=".kml, .shp">
+                    <input type="file" onchange="abrirFiles(event, '${count}', this.files[0])" class="form-control" id="file${count}" accept=".kml, .shp">
                 </div>
             </div>
             `);
@@ -250,7 +253,8 @@
 
 
         // Inicio BuscaFile
-        function abrirFiles(e, id) {
+        function abrirFiles(e, id, teste) {
+
             var nome = $(`#nomeCamada${id}`).val();
             var tipo = $(`#tipo${id}`).val();
 
@@ -260,42 +264,116 @@
                 return;
             }
 
+            // var file = e.target.files[0];
+            var file = teste;
             var nameFile = e.target.files[0].name;
             var extFile = nameFile.split('.').pop().toLowerCase();
             var fr = new FileReader();
 
+            var geojson = {
+                type: "FeatureCollection",
+                id: id,
+                features: [],
+            }
 
-            fr.onload = function () {
+            fr.onload = function (event) {
                 if (extFile == 'kml') {
                     var kmlImport = toGeoJSON.kml(new DOMParser().parseFromString(fr.result, "text/xml"));
                     var arr = kmlImport.features;
                     for (var i = 0; i < arr.length; i++) {
-                        arr[i].properties.tipo = tipo;
-                        var geojsonLayers = drawnItems.addLayer(L.geoJSON(arr[i].geometry));
-                        var bounds = geojsonLayers.getBounds();
-                        map.fitBounds(bounds);
-                        var center = bounds.getCenter();
-                        map.panTo(center);
+                        arr[i].properties.id = id
+                        arr[i].properties.tipo = tipo
+                        arr[i].properties.nome = nome
+                        geojson.features.push(arr[i]);
                     }
-                } else if (extFile == 'shp') {
-                    shp(fr.result).then(function (geojson) {
-                        var arr = geojson.features;
-                        for (var i = 0; i < arr.length; i++) {
-                            arr[i].properties.tipo = tipo;
-                            var geojsonLayers = drawnItems.addLayer(L.geoJSON(arr[i].geometry));
-                            var bounds = geojsonLayers.getBounds();
-                            map.fitBounds(bounds);
-                            var center = bounds.getCenter();
-                            map.panTo(center);
-                        }
-                    });
+                    montarLayer(geojson, id);
+                } else if (extFile == 'zip') {
+                    var zip = new JSZip();
+
+                    try {
+                        zip.loadAsync(file)
+                            .then(function (zip) {
+                                var shpFile, dbfFile;
+
+                                zip.forEach(function (relativePath, file) {
+                                    if (relativePath.endsWith('.shp')) {
+                                        shpFile = file;
+                                    } else if (relativePath.endsWith('.dbf')) {
+                                        dbfFile = file;
+                                    }
+                                });
+
+                                if (shpFile && dbfFile) {
+                                    Promise.all([shpFile.async('arraybuffer'), dbfFile.async('arraybuffer')])
+                                        .then(function (buffers) {
+                                            var shpData = new Uint8Array(buffers[0]);
+                                            var dbfData = new Uint8Array(buffers[1]);
+                                            var geojson = shp.combine([
+                                                shp.parseShp(shpData),
+                                                shp.parseDbf(dbfData)
+                                            ]);
+
+                                            var arr = geojson.features;
+                                            for (var i = 0; i < arr.length; i++) {
+                                                arr[i].properties.id = id
+                                                arr[i].properties.tipo = tipo
+                                                arr[i].properties.nome = nome
+                                            }
+                                            montarLayer(geojson, id)
+                                        })
+                                        .catch(function (error) {
+                                            console.error('Error reading files:', error);
+                                        });
+                                } else {
+                                    console.error('Shapefile or DBF file missing');
+                                }
+                            })
+                            .catch(function (error) {
+                                console.error('Error reading ZIP file:', error);
+                            });
+                    } catch (error) {
+                        console.error('Error loadingloading ZIP file:', error);
+                    }
                 } else {
-                    alert('Extensão de arquivo não permitida');
+
                 }
-            };
+            }
             fr.readAsText(e.target.files[0]);
         }
         // Fim BuscaFile
+
+        // Montar Layers Geojson
+        function montarLayer(geojson, id) {
+            var geojsonLayer = L.geoJSON(geojson, {
+                id: `vcar${id}`,
+            }).addTo(drawnItems);
+
+            geojsonLayer.eachLayer(function (layer) {
+                feature = layer.feature
+                // console.log("Feature: ", feature);
+                // console.log("Layer: ", layer._leaflet_id);
+                var popupContent = "<form action=\"javascript:void(0);\"><h3 class='text-center text-uppercase'>Propriedades</h3>";
+                for (var prop in feature.properties) {
+                    if (prop != 'id') {
+                        popupContent += `<p class="text-uppercase"><strong>${prop}:</strong> ${feature.properties[prop]}</p>`
+                    }
+                }
+                popupContent += `
+                    <div class="row">
+                        <button name="" id="" type="button" class="btn btn-sm btn-primary col mx-1">Salvar</button>
+                        <button name="" id="" type="button" class="btn btn-sm btn-secondary col mx-1">Cancelar</button>
+                    <div>`;
+                popupContent += `</form>`;
+                layer.bindPopup(popupContent);
+            });
+
+            var bounds = geojsonLayer.getBounds();
+            map.fitBounds(bounds);
+            var center = bounds.getCenter();
+            map.panTo(center);
+        }
+
+
     </script>
 </body>
 

@@ -222,8 +222,8 @@ L.drawLocal = {
     }
 }
 
-
 map.addControl(drawControl);
+
 map.on('draw:created', function (e) {
     console.log(e.layer);
     drawnItems.addLayer(e.layer);
