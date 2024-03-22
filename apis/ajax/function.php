@@ -11,7 +11,6 @@ require_once("../phpmailer/credenciais.php");
 
 function enviarEmail($email, $data, $html = "")
 {
-
     $mail = new PHPMailer;
     $mail->Host = 'smtp.hostinger.com';
     $mail->isSMTP();

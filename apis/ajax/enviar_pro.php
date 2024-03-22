@@ -12,15 +12,7 @@ require_once("./function.php");
 $nome = filter_input(INPUT_POST, 'nome');
 $email = filter_input(INPUT_POST, 'email');
 $cpf = filter_input(INPUT_POST, 'cpf');
-$telefone = filter_input(INPUT_POST, 'telefone');
-$cep = filter_input(INPUT_POST, 'cep');
-$uf = filter_input(INPUT_POST, 'uf');
-$cidade = filter_input(INPUT_POST, 'cidade');
-$rua = filter_input(INPUT_POST, 'rua');
-$bairro = filter_input(INPUT_POST, 'bairro');
-$numero = filter_input(INPUT_POST, 'numero');
-$complemento = filter_input(INPUT_POST, 'complemento');
-$motivo = filter_input(INPUT_POST, 'motivo');
+$processo = filter_input(INPUT_POST, 'processo');
 date_default_timezone_set('America/Sao_Paulo');
 $data = date('d/m/Y H:i:s');
 
@@ -51,24 +43,22 @@ if (isset($_FILES['file']) && $_FILES['file']['error'] == UPLOAD_ERR_OK) {
     $mail->addAttachment($_FILES['file']['tmp_name'], $_FILES['file']['name']);
 }
 
+if (isset($_FILES['inputFile']) && $_FILES['inputFile']['error'] == UPLOAD_ERR_OK) {
+    $mail->addAttachment($_FILES['inputFile']['tmp_name'], $_FILES['inputFile']['name']);
+}
+
 $mail->addAddress('condicoesambientais@gmail.com');
 
 $mail->CharSet = 'UTF-8';
 $mail->isHTML(true);
-$mail->Subject = "Nova Entrada de Formulário {$data}";
+$mail->Subject = "(PRO) Nova Entrada de Formulário {$data}";
 $mail->Body = "
 <h2>Dados do novo Contato</h2></br>
 <h3>Nome: <strong>{$nome}</strong></h3></br>
 <h3>CPF: <strong>{$cpf}</strong></h3></br>
 <h3>Email: <strong>{$email}</strong></h3></br>
-<h3>Telefone: <strong>{$telefone}</strong></h3></br>
-<h3>Cep: <strong>{$cep}</strong></h3></br>
-<h3>Cidade: <strong>{$cidade}/{$uf}</strong></h3></br>
-<h3>Endereço: <strong>{$rua} - {$bairro} - {$numero}</strong></h3></br>
-<h3>Complemento: <strong>{$complemento}</strong></h3></br>
-<h3>Motivo: <strong>{$motivo}</strong></h3></br>
+<h3>Nº do Processo: <strong>{$processo}</strong></h3>
 ";
-
 $enviar = enviarEmail($email, $data);
 
 if (!$mail->send()) {
