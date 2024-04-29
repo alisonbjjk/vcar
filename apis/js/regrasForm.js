@@ -199,3 +199,25 @@ function pesquisacep(valor) {
 
 $('#telefone').mask('(99) 99999-9999')
 $('#cpf').mask('999.999.999-99')
+
+// Buscar com UTM
+function buscaUtm() {
+    var utmX = document.getElementById('utmX').value
+    var utmY = document.getElementById('utmY').value
+    var utmZona = document.getElementById('utmZone').value
+
+    if (utmX == '' && utmY == '' && utmZona == '') {
+        Swal.fire({
+            icon: "error",
+            title: "Atenção...",
+            text: "Todos os campos são obrigatórios!",
+        });
+    } else {
+        var utm = `+proj=utm +zone=${parseInt(utmZona)} +south +ellps=GRS67 +units=m +no_defs`;
+        var wgs84 = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs";
+        var LatLong = proj4(utm, wgs84, [parseInt(utmX), parseInt(utmY)]);
+        var geojsonLayers = L.marker([LatLong[1], LatLong[0]]).addTo(drawnItems);
+        map.setView([LatLong[1], LatLong[0]], 15);
+        $('.modal').modal('hide');
+    }
+}
