@@ -10,12 +10,15 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
         integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.5.1/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet-geosearch@3.11.0/assets/css/leaflet.css" />
     <link href='https://api.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v1.0.1/leaflet.fullscreen.css'
         rel='stylesheet' />
     <link rel="stylesheet" href="//norkart.github.io/Leaflet-MiniMap/Control.MiniMap.css" />
+    <link rel="stylesheet" href="https://teastman.github.io/Leaflet.pattern/leaflet.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet-easyprint@2.1.9/libs/leaflet.min.css">
     <style>
         #map {
             height: 600px;
@@ -74,11 +77,7 @@
             <div class="card-body">
                 <form class="d-flex justify-content-center" action="." id="frm" role="frm">
                     <div class="row g-3">
-                        <div class="d-flex justify-content-between">
-                            <div class="col-3">
-                                <button class="btn btn-sm btn-primary" type="button" onclick="localAtual()">Local
-                                    Atual</button>
-                            </div>
+                        <div class="d-flex justify-content-end">
                             <div class="col-3">
                                 <select class="form-select form-select-sm" id="tipoMapa">
                                     <option value="0">Open Street Map</option>
@@ -91,6 +90,7 @@
                             </div>
                         </div>
                         <div class="my-4" id="map"></div>
+                        <input type="file" id="inputFile" name="inputFile" style="display:none">
                         <div class="col-6">
                             <label for="nome" class="form-label text-uppercase">Nome <label
                                     class="text-danger">*</label></label>
@@ -107,39 +107,51 @@
                             <input type="text" class="form-control" id="cpf" name="cpf">
                         </div>
                         <div class="col-6 mb-3">
-                            <label for="telefone" class="form-label text-uppercase">TELEFONE</label>
-                            <input type="text" class="form-control" id="telefone" name="telefone">
+                            <label for="processo" class="form-label text-uppercase">Nº do Processo</label>
+                            <input type="text" class="form-control" id="processo" name="processo">
                         </div>
                         <hr>
                         <div class="d-flex justify-content-center">
                             <h4>CAMADAS</h4>
                         </div>
                         <div id="camadas" class="m-0 p-0" count="1">
-                            <div class="row justify-content-between border rounded p-3 m-2" id="1" count="1">
+                            <div class="row justify-content-between align-self-center border rounded p-3 m-2" id="div-1"
+                                id="1" count="1">
+                                <div class="col-12 btn d-flex justify-content-end align-self-center">
+                                    <button onclick="removeCamadas('1')" type="button" class="btn">
+                                        <i class="fa-regular fa-trash-can fa-lg" style="color: #ff0000;"></i>
+                                    </button>
+                                </div>
                                 <div class="col-4">
                                     <label for="nomeCamada1" class="form-label text-uppercase">Nome da camada</label>
                                     <input type="text" class="form-control" id="nomeCamada1" rows="4"
                                         placeholder="Se preferir, atribua um nome para a Camada. Por exemplo: Área de Cultivo." />
                                 </div>
                                 <div class="col-3">
-                                    <label for="tipo1" class="form-label text-uppercase">Tipo da camada</label>
+                                    <label for="tipo1" class="form-label text-uppercase">Tipo da camada <label
+                                            class="text-danger">*</label></label>
                                     <select id="tipo1" class="form-select" aria-label="Default select example">
                                         <option selected disabled>SELECIONAR TIPO</option>
                                         <option value="Aceiros">Aceiros</option>
-                                        <option value="Aerogeradires">Aerogeradires</option>
-                                        <option value="2">ANM</option>
-                                        <option value="3">APPs de Declividade</option>
-                                        <option value="3">Imóveis</option>
-                                        <option value="3">Planilha - Imóveis CAR</option>
-                                        <option value="3">DVFL</option>
-                                        <option value="3">Estágio Inicial</option>
-                                        <option value="3">Estágio Médio</option>
-                                        <option value="3">Estágio Avançado</option>
+                                        <option value="Aerogeradores">Aerogeradores</option>
+                                        <option value="ANM">ANM</option>
+                                        <option value="APPs de Declividades">APPs de Declividades</option>
+                                        <option value="Curvas de Nível">Curvas de Nível</option>
+                                        <option value="Declividades 25 a 44°">Declividades entre 25° e 45°</option>
+                                        <option value="Empreendimento">Empreendimento</option>
+                                        <option value="RLs em Condomínio">RLs em Condomínio</option>
+                                        <option value="Subestação de Energia Elétrica">Subestação de Energia Elétrica
+                                        </option>
+                                        <option value="Supressão DVFL">DVFL</option>
+                                        <option value="Supressão Estágio Avançado">Estágio Avançado</option>
+                                        <option value="Supressão Estágio Inicial">Estágio Inicial</option>
+                                        <option value="Supressão Estágio Médio">Estágio Médio</option>
+                                        <option value="Supressão Indivíduos Arbóreos">Indivíduos Arbóreos</option>
                                     </select>
                                 </div>
                                 <div class="col-5">
                                     <label for="file1" class="form-label text-uppercase">arquivos
-                                        georeferenciados (.SHP e/ou .KML)</label>
+                                        georeferenciados (.ZIP e/ou .KML)</label>
                                     <input onchange="abrirFiles(event, '1', this.files[0])" type="file"
                                         class="form-control" id="file1" accept=".kml, .zip">
                                 </div>
@@ -187,7 +199,8 @@
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"
         integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/jquery.maskedinput/1.4.1/jquery.maskedinput.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.5.1/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6.5.0/turf.min.js"></script>
     <script src="https://www.google.com/recaptcha/api.js"></script>
@@ -198,16 +211,25 @@
     <script src="https://norkart.github.io/Leaflet-MiniMap/Control.MiniMap.js" crossorigin="anonymous"></script>
     <script src="../apis/js/kmlToGeojson.js"></script>
     <script src="../apis/js/imporShp.js"></script>
-
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.6.0/jszip.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/shapefile@0.6.6/dist/shapefile.min.js"></script>
-
+    <script src="https://unpkg.com/leaflet.pattern@0.1.0/dist/leaflet.pattern-src.js"></script>
     <script src="../apis/js/baseMapas.js"></script>
-    <script src="./js/regrasMapa.js?1=1"></script>
+    <script src="./js/regrasMapa.js"></script>
+    <script src="./js/forms.js"></script>
     <script>
 
         function removeCamadas(camada) {
             $(`#div-${camada}`).remove();
+            removeLayerById(`vcar${camada}`)
+        }
+
+        function removeLayerById(layerId) {
+            drawnItems.eachLayer(function (layer) {
+                if (layer.options && layer.options.id === layerId) {
+                    drawnItems.removeLayer(layer);
+                }
+            });
         }
 
         function adicionarCamadas() {
@@ -217,35 +239,40 @@
 
             $("#camadas").append(`
             <div class="row justify-content-between border rounded p-3 pt-0 m-2" id="div-${count}" value="${count}">
-                    <div class="col-12 btn d-flex justify-content-end align-self-center">
-                        <button onclick="removeCamadas('${count}')" type="button" class="btn">
-                            <i class="fa-regular fa-trash-can fa-lg" style="color: #ff0000;"></i>
-                        </button>
-                    </div>
+                <div class="col-12 btn d-flex justify-content-end align-self-center">
+                    <button onclick="removeCamadas('${count}')" type="button" class="btn">
+                        <i class="fa-regular fa-trash-can fa-lg" style="color: #ff0000;"></i>
+                    </button>
+                </div>
                 <div class="col-4">
                     <label for="nomeCamada${count}" class="form-label text-uppercase">Nome da camada</label>
                     <input type="text" class="form-control" id="nomeCamada${count}" rows="4" placeholder="Se preferir, atribua um nome para a Camada. Por exemplo: Área de Cultivo." />
                 </div>
                 <div class="col-3">
-                    <label for="tipo${count}" class="form-label text-uppercase">Tipo da camada</label>
+                    <label for="tipo${count}" class="form-label text-uppercase">Tipo da camada <label class="text-danger">*</label></label>
                     <select id="tipo${count}" class="form-select" aria-label="Default select example">
                         <option selected disabled>SELECIONAR TIPO</option>
                         <option value="Aceiros">Aceiros</option>
-                        <option value="Aerogeradires">Aerogeradires</option>
-                        <option value="3">ANM</option>
-                        <option value="4">APPs de Declividade</option>
-                        <option value="5">Imóveis</option>
-                        <option value="6">Planilha - Imóveis CAR</option>
-                        <option value="7">DVFL</option>
-                        <option value="8">Estágio Inicial</option>
-                        <option value="9">Estágio Médio</option>
-                        <option value="10">Estágio Avançado</option>
+                        <option value="Aerogeradores">Aerogeradores</option>
+                        <option value="ANM">ANM</option>
+                        <option value="APPs de Declividades">APPs de Declividades</option>
+                        <option value="Curvas de Nível">Curvas de Nível</option>
+                        <option value="Declividades 25 a 44°">Declividades entre 25° e 45°</option>
+                        <option value="Empreendimento">Empreendimento</option>
+                        <option value="RLs em Condomínio">RLs em Condomínio</option>
+                        <option value="Subestação de Energia Elétrica">Subestação de Energia Elétrica
+                        </option>
+                        <option value="Supressão DVFL">DVFL</option>
+                        <option value="Supressão Estágio Avançado">Estágio Avançado</option>
+                        <option value="Supressão Estágio Inicial">Estágio Inicial</option>
+                        <option value="Supressão Estágio Médio">Estágio Médio</option>
+                        <option value="Supressão Indivíduos Arbóreos">Indivíduos Arbóreos</option>
                     </select>
                 </div>
                 <div class="col-5">
                     <label for="file${count}" class="form-label text-uppercase">arquivos
-                        georeferenciados (.SHP e/ou .KML)</label>
-                    <input type="file" onchange="abrirFiles(event, '${count}', this.files[0])" class="form-control" id="file${count}" accept=".kml, .shp">
+                        georeferenciados (.ZIP e/ou .KML)</label>
+                    <input type="file" onchange="abrirFiles(event, '${count}', this.files[0])" class="form-control" id="file${count}" accept=".kml, .zip">
                 </div>
             </div>
             `);
@@ -254,7 +281,6 @@
 
         // Inicio BuscaFile
         function abrirFiles(e, id, teste) {
-
             var nome = $(`#nomeCamada${id}`).val();
             var tipo = $(`#tipo${id}`).val();
 
@@ -284,17 +310,25 @@
                         arr[i].properties.id = id
                         arr[i].properties.tipo = tipo
                         arr[i].properties.nome = nome
+                        if (!arr[i].properties.fill) {
+                            arr[i].properties.fill = "#008000";
+                            arr[i].properties.stroke = "#008000";
+                            arr[i].properties['stroke-width'] = 2;
+                            arr[i].properties['stroke-opacity'] = 1;
+                            arr[i].properties['fill-opacity'] = 0.3;
+                        }
                         geojson.features.push(arr[i]);
                     }
                     montarLayer(geojson, id);
+                    $(`#nomeCamada${id}`).attr("disabled", true);
+                    $(`#tipo${id}`).attr("disabled", true);
+                    $(`#file${id}`).attr("disabled", true);
                 } else if (extFile == 'zip') {
                     var zip = new JSZip();
-
                     try {
                         zip.loadAsync(file)
                             .then(function (zip) {
                                 var shpFile, dbfFile;
-
                                 zip.forEach(function (relativePath, file) {
                                     if (relativePath.endsWith('.shp')) {
                                         shpFile = file;
@@ -318,53 +352,104 @@
                                                 arr[i].properties.id = id
                                                 arr[i].properties.tipo = tipo
                                                 arr[i].properties.nome = nome
+                                                if (!arr[i].properties.fill) {
+                                                    arr[i].properties.fill = "#008000";
+                                                    arr[i].properties.stroke = "#008000";
+                                                    arr[i].properties['stroke-width'] = 2;
+                                                    arr[i].properties['stroke-opacity'] = 1;
+                                                    arr[i].properties['fill-opacity'] = 0.3;
+                                                }
                                             }
-                                            montarLayer(geojson, id)
+                                            montarLayer(geojson, id);
+                                            $(`#nomeCamada${id}`).attr("disabled", true);
+                                            $(`#tipo${id}`).attr("disabled", true);
+                                            $(`#file${id}`).attr("disabled", true);
                                         })
                                         .catch(function (error) {
-                                            console.error('Error reading files:', error);
+                                            console.error('Erro ao ler arquivos:', error);
                                         });
                                 } else {
-                                    console.error('Shapefile or DBF file missing');
+                                    alert('Arquivo Shapefile ou DBF ausente');
                                 }
                             })
                             .catch(function (error) {
-                                console.error('Error reading ZIP file:', error);
+                                console.error('Erro ao ler arquivo ZIP:', error);
                             });
                     } catch (error) {
-                        console.error('Error loadingloading ZIP file:', error);
+                        console.error('Erro ao carregar o arquivo ZIP:', error);
                     }
                 } else {
-
+                    $(`#file${id}`).val("");
+                    Swal.fire({
+                        icon: "error",
+                        title: "Oops...",
+                        text: "Inserir Arquivo do tipo GEOREFERENCIADOS(.ZIP e/ou .KML)!",
+                    });
                 }
             }
             fr.readAsText(e.target.files[0]);
+
         }
         // Fim BuscaFile
 
         // Montar Layers Geojson
         function montarLayer(geojson, id) {
             var geojsonLayer = L.geoJSON(geojson, {
-                id: `vcar${id}`,
+                id: `vcar${id}`
             }).addTo(drawnItems);
 
             geojsonLayer.eachLayer(function (layer) {
                 feature = layer.feature
-                // console.log("Feature: ", feature);
-                // console.log("Layer: ", layer._leaflet_id);
-                var popupContent = "<form action=\"javascript:void(0);\"><h3 class='text-center text-uppercase'>Propriedades</h3>";
-                for (var prop in feature.properties) {
-                    if (prop != 'id') {
-                        popupContent += `<p class="text-uppercase"><strong>${prop}:</strong> ${feature.properties[prop]}</p>`
+
+                if (feature.properties['fill']) {
+                    feature.properties['fill-opacity'] ? fillOpacity = feature.properties['fill-opacity'] : fillOpacity = feature.properties['fill-opa'];
+                    feature.properties['stroke-opacity'] ? strokeOpacity = feature.properties['stroke-opacity'] : strokeOpacity = feature.properties['stroke-o'];
+                    feature.properties['stroke-width'] ? strokeWidth = feature.properties['stroke-width'] : strokeWidth = feature.properties['stroke-w'];
+
+                    // var hachura = new L.StripePattern({
+                    //     angle: 45,
+                    //     weight: 3,
+                    //     spaceWeight: 4,
+                    //     color: 'red',
+                    //     opacity: 1
+                    // });
+                    // hachura.addTo(map);
+                    // console.log(hachura);
+
+                    if (feature.geometry.type != 'Point') {
+                        layer.setStyle({
+                            fillColor: feature.properties['fill'],
+                            fillOpacity: fillOpacity,
+                            color: feature.properties.stroke,
+                            width: strokeWidth,
+                            opacity: strokeOpacity,
+                            // fillPattern: hachura
+                        })
                     }
                 }
-                popupContent += `
-                    <div class="row">
-                        <button name="" id="" type="button" class="btn btn-sm btn-primary col mx-1">Salvar</button>
-                        <button name="" id="" type="button" class="btn btn-sm btn-secondary col mx-1">Cancelar</button>
-                    <div>`;
+
+                var popupContent = `<form action=\"javascript:void(0);\"><table class="table table-striped table-bordered p-0 m-0" style="width:100%">`;
+                for (var prop in feature.properties) {
+                    if (prop != 'id') {
+                        if (prop == 'stroke') {
+                            popupContent += `<tr><td>${prop}</td><td><input type="color" disabled style="width: 100%; height: 15px;" value="${feature.properties[prop]}" /></td></tr>`;
+                        } else if (prop == 'fill') {
+                            popupContent += `
+                            <tr>
+                                <td>${prop}</td>
+                                <td><input type="color" disabled style="width: 100%; height: 15px;" value="${feature.properties[prop]}" /></td>
+                            </tr>`;
+                        } else {
+                            popupContent += `<tr><td>${prop}</td><td>${feature.properties[prop]}</td></tr>`;
+                        }
+                    }
+                }
+                popupContent += `</table><hr>
+                    <div class="row p-0 m-0">`;
+                popupContent += ` <button name="" id="" type="button" class="btn btn-sm btn-primary col mx-1">Salvar</button><button name="" id="" type="button" onclick="map.closePopup()" class="btn btn-sm btn-secondary col mx-1">Cancelar</button>`;
+                popupContent += `<div>`;
                 popupContent += `</form>`;
-                layer.bindPopup(popupContent);
+                layer.bindPopup(popupContent, { minWidth: 200, maxWidth: 240 });
             });
 
             var bounds = geojsonLayer.getBounds();
@@ -372,7 +457,6 @@
             var center = bounds.getCenter();
             map.panTo(center);
         }
-
 
     </script>
 </body>
