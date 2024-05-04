@@ -50,9 +50,6 @@ $("#enviar").on("click", function () {
         var blob = new Blob([JSON.stringify(collection)], { type: "application/json" });
         dados.append("file", blob, 'vcar.geojson');
 
-        // console.log(JSON.stringify(collection));
-        // return;
-
         $.ajax({
             url: '../apis/ajax/enviar_pro.php',
             type: 'POST',

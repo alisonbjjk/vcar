@@ -15,7 +15,6 @@ var baselayer = new L.TileLayer(basemaps[3]['tilelayer'], {
     attribution: basemaps[3]['attribution']
 });
 
-
 L.control.scale().addTo(map);
 
 map.addLayer(baselayer);
@@ -44,11 +43,17 @@ function success(pos) {
     const crd = pos.coords;
     var mak = drawnItems.addLayer(L.marker([crd.latitude, crd.longitude]));
     map.setView([crd.latitude, crd.longitude], 18);
+
+    // var abc = mak.toGeoJSON().features[0]
+    // var buffered = turf.buffer(abc, 0.1, { units: 'kilometers' });
+    // drawnItems.addLayer(L.geoJson(buffered));
+
 }
 
 function error(err) {
     console.warn(`ERROR(${err.code}): ${err.message}`);
 }
+
 
 function localAtual() {
     navigator.geolocation.getCurrentPosition(success, error, options);
@@ -107,6 +112,8 @@ var drawControl = new L.Control.Draw({
                 color: '#bada55'
             }
         },
+        marker: {
+        },
         polyline: false,
         rectangle: false,
         circle: false,
@@ -133,14 +140,14 @@ L.drawLocal = {
                 text: 'Excluir último ponto'
             },
             buttons: {
-                polygon: 'Desenhar Polígono',
+                polygon: 'Selecionar Polígono',
                 marker: 'Inserir Ponto',
             }
         },
         handlers: {
             circle: {
                 tooltip: {
-                    start: 'Clique e arraste para desenhar um círculo.'
+                    start: 'Clique e arraste para selecionar um círculo.'
                 },
                 radius: 'Raio'
             },
@@ -156,7 +163,7 @@ L.drawLocal = {
             },
             polygon: {
                 tooltip: {
-                    start: 'Clique para começar a desenhar.',
+                    start: 'Clique para começar a selecionar.',
                     cont: 'Clique para continuar desenhando.',
                     end: 'Clique no primeiro ponto para fechar o desenho.'
                 }
@@ -164,19 +171,19 @@ L.drawLocal = {
             polyline: {
                 error: '<strong>Erro: as bordas da forma não podem cruzar!</strong>',
                 tooltip: {
-                    start: 'Clique para começar a desenhar a linha.',
+                    start: 'Clique para começar a selecionar a linha.',
                     cont: 'Clique para continuar desenhando a linha.',
                     end: 'Clique no último ponto para terminar a linha.'
                 }
             },
             rectangle: {
                 tooltip: {
-                    start: 'Clique e arraste para desenhar um retângulo.'
+                    start: 'Clique e arraste para selecionar um retângulo.'
                 }
             },
             simpleshape: {
                 tooltip: {
-                    end: 'Solte o mouse para terminar de desenhar.'
+                    end: 'Solte o mouse para terminar de selecionar.'
                 }
             }
         }
@@ -198,7 +205,7 @@ L.drawLocal = {
                 }
             },
             buttons: {
-                edit: 'Editae Camada',
+                edit: 'Editar Camada',
                 editDisabled: 'Nenhuma camada para editar',
                 remove: 'Deletar Camada',
                 removeDisabled: 'Nenhuma camada para excluir'
@@ -220,19 +227,34 @@ L.drawLocal = {
     }
 }
 
-
 map.addControl(drawControl);
 map.on('draw:created', function (e) {
-    drawnItems.addLayer(e.layer);
+    var layer = e.layer;
+    drawnItems.addLayer(layer);
+
+    // Verifique a área do polígono desenhado
+    var area = L.GeometryUtil.geodesicArea(layer.getLatLngs()[0]);
+    // Converta a área para hectares (1 metro quadrado = 0.0001 hectares)
+    var areaHectares = area * 0.0001;
+
+    // Se a área for maior que 5 hectares, informe ao usuário e limpe a área desenhada
+    if (areaHectares > 5) {
+        Swal.fire({
+            icon: "error",
+            title: "Atenção...",
+            text: "A área selecionada excede 5 hectares. Por favor, delimite uma área menor ou entre em contato com nossa equipe, para contratar um análise que atenda a área requisitada e tenha o benefício de uma análise mais completa!",
+        });
+        drawnItems.removeLayer(layer);
+    }
 });
 
-
 function limites() {
-    L.tileLayer.betterWms("https://seia.idema.rn.gov.br/geoserver/wcs", {
-        layers: 'idemarn:limites_municipais_rn',
-        format: 'image/png',
-        transparent: true,
-    }).addTo(map);
+    var geojsonLayer = L.geoJSON(mapaRNGeojson, {
+        "color": "#D6DAC8",
+        "weight": 1.5,
+        "fillOpacity": 0.1,
+        "opacity": 0.7
+    }).addTo(drawnItems);
 }
 
 limites();

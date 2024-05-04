@@ -93,11 +93,13 @@ var drawnItems = new L.FeatureGroup();
 map.addLayer(drawnItems);
 
 function limites() {
-    L.tileLayer.betterWms("https://seia.idema.rn.gov.br/geoserver/wcs", {
-        layers: 'idemarn:limites_municipais_rn',
-        format: 'image/png',
-        transparent: true,
-    }).addTo(map);
+    var geojsonLayer = L.geoJSON(mapaRNGeojson, {
+        "color": "#D6DAC8",
+        "weight": 1.5,
+        "fillOpacity": 0.1,
+        "opacity": 0.7
+    }).addTo(drawnItems);
 }
+
 
 limites();
