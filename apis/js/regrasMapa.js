@@ -1,4 +1,4 @@
-// criarMapa
+// CriarMapa
 var map = new L.Map('map', {
     center: new L.LatLng(-5.9, -36.7),
     zoom: 8,
@@ -31,7 +31,6 @@ map.addControl(search);
 $(".geosearch").addClass("active");
 // Fim criarMapa
 
-
 // localizacaoAtual
 const options = {
     enableHighAccuracy: true,
@@ -43,11 +42,6 @@ function success(pos) {
     const crd = pos.coords;
     var mak = drawnItems.addLayer(L.marker([crd.latitude, crd.longitude]));
     map.setView([crd.latitude, crd.longitude], 18);
-
-    // var abc = mak.toGeoJSON().features[0]
-    // var buffered = turf.buffer(abc, 0.1, { units: 'kilometers' });
-    // drawnItems.addLayer(L.geoJson(buffered));
-
 }
 
 function error(err) {
@@ -59,7 +53,6 @@ function localAtual() {
     navigator.geolocation.getCurrentPosition(success, error, options);
 }
 // Fim localizacaoAtual
-
 
 // mudarMapa
 $("#tipoMapa").on("change", "", function (e) {
@@ -75,7 +68,6 @@ $("#tipoMapa").on("change", "", function (e) {
     limites();
 });
 // Fim mudarMapa
-
 
 // Draw
 var custon1 = L.Icon.extend({
@@ -228,23 +220,40 @@ L.drawLocal = {
 }
 
 map.addControl(drawControl);
+
+// Variável para armazenar o marcador desenhado
+var drawnMarker = null;
 map.on('draw:created', function (e) {
     var layer = e.layer;
     drawnItems.addLayer(layer);
 
-    // Verifique a área do polígono desenhado
-    var area = L.GeometryUtil.geodesicArea(layer.getLatLngs()[0]);
-    // Converta a área para hectares (1 metro quadrado = 0.0001 hectares)
-    var areaHectares = area * 0.0001;
+    if (layer instanceof L.Marker) {
+        if (drawnMarker) {
+            // Remova o marcador anterior, se existir
+            Swal.fire({
+                icon: "error",
+                title: "Atenção...",
+                text: "A área selecionada excede uma marcação. Por favor, para mais marcações, entre em contato com nossa equipe para contratar uma análise que atenda à área requisitada e tenha o benefício de uma análise mais completa!",
+            });
+            map.removeLayer(drawnMarker);
+        }
+        var layer = e.layer;
+        drawnMarker = layer;
+    } else {
+        // Verifique a área do polígono desenhado
+        var area = L.GeometryUtil.geodesicArea(layer.getLatLngs()[0]);
+        // Converta a área para hectares (1 metro quadrado = 0.0001 hectares)
+        var areaHectares = area * 0.0001;
 
-    // Se a área for maior que 5 hectares, informe ao usuário e limpe a área desenhada
-    if (areaHectares > 5) {
-        Swal.fire({
-            icon: "error",
-            title: "Atenção...",
-            text: "A área selecionada excede 5 hectares. Por favor, delimite uma área menor ou entre em contato com nossa equipe, para contratar um análise que atenda a área requisitada e tenha o benefício de uma análise mais completa!",
-        });
-        drawnItems.removeLayer(layer);
+        // Se a área for maior que 5 hectares, informe ao usuário e limpe a área desenhada
+        if (areaHectares > 5) {
+            Swal.fire({
+                icon: "error",
+                title: "Atenção...",
+                text: "A área selecionada excede 5 hectares. Por favor, delimite uma área menor ou entre em contato com nossa equipe para contratar uma análise que atenda à área requisitada e tenha o benefício de uma análise mais completa!",
+            });
+            drawnItems.removeLayer(layer);
+        }
     }
 });
 
@@ -254,7 +263,7 @@ function limites() {
         "weight": 1.5,
         "fillOpacity": 0.1,
         "opacity": 0.7
-    }).addTo(drawnItems);
+    }).addTo(map);
 }
 
 limites();

@@ -98,8 +98,7 @@ function limites() {
         "weight": 1.5,
         "fillOpacity": 0.1,
         "opacity": 0.7
-    }).addTo(drawnItems);
+    }).addTo(map);
 }
-
 
 limites();

@@ -43,7 +43,8 @@ $("#enviar").on("click", function () {
         var dados = new FormData(myForm);
         var blob = new Blob([JSON.stringify(collection)], { type: "application/json" });
         dados.append("file", blob, 'vcar.geojson');
-
+        console.log(collection);
+        return;
         $.ajax({
             url: '../apis/ajax/enviarEmail.php',
             type: 'POST',
@@ -86,70 +87,6 @@ $("#enviar").on("click", function () {
     }
 });
 // Fim Enviar
-
-
-// BuscaFile
-document.getElementById('file').addEventListener('change', function (e) {
-    e.preventDefault();
-    var nameFile = e.target.files[0].name
-    var extFile = nameFile.split('.').pop().toLowerCase()
-    var fr = new FileReader();
-
-    fr.onload = function () {
-        if (extFile == 'kml') {
-            var kmlImport = toGeoJSON.kml(new DOMParser().parseFromString(fr.result, "text/xml"))
-            var arr = kmlImport.features;
-            for (var i = 0; i < arr.length; i++) {
-                var geojsonLayers = L.geoJSON(arr[i].geometry).addTo(drawnItems);
-                // regra de 5 hectares // tem em outros locais
-                var areaInSquareMeters = turf.area(arr[i]) / 10000;
-                if (areaInSquareMeters > 5) {
-                    Swal.fire({
-                        icon: "error",
-                        title: "Atenção...",
-                        text: "A área selecionada excede 5 hectares. Por favor, delimite uma área menor ou entre em contato com nossa equipe, para contratar um análise que atenda a área requisitada e tenha o benefício de uma análise mais completa!",
-                    });
-                    drawnItems.removeLayer(geojsonLayers);
-                } else {
-                    var bounds = geojsonLayers.getBounds()
-                    map.fitBounds(bounds)
-                    var center = bounds.getCenter()
-                    map.panTo(center)
-                }
-            }
-        } else if (extFile == 'shp') {
-            fr.readAsDataURL(e.target.files[0]);
-            fr.onload = function () {
-                shp(fr.result).then(function (geojson) {
-                    var arr = geojson.features;
-                    for (var i = 0; i < arr.length; i++) {
-                        var geojsonLayers = L.geoJSON(arr[i].geometry).addTo(drawnItems);
-                        // regra de 5 hectares // tem em outros locais
-                        var areaInSquareMeters = turf.area(arr[i]) / 10000;
-                        if (areaInSquareMeters > 5) {
-                            Swal.fire({
-                                icon: "error",
-                                title: "Atenção...",
-                                text: `A área selecionada excede 5 hectares. Por favor, delimite uma área menor ou entre em contato com nossa equipe, para contratar um análise que atenda a área requisitada e tenha o benefício de uma análise mais completa!`,
-                            });
-                            drawnItems.removeLayer(geojsonLayers);
-                        } else {
-                            var bounds = geojsonLayers.getBounds()
-                            map.fitBounds(bounds)
-                            var center = bounds.getCenter()
-                            map.panTo(center)
-                        }
-                    }
-                })
-            };
-        } else {
-            alert('Extensão de arquivo não permitida');
-        }
-    }
-    fr.readAsText(this.files[0]);
-});
-// Fim BuscaFile
-
 
 // BuscaCEP
 function limpa_formulário_cep() {
