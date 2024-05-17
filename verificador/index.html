@@ -95,53 +95,19 @@
                             </div>
                         </div>
                         <div class="my-4" id="map"></div>
-                        <div class="col-6">
+                        <div class="col-4">
                             <label for="nome" class="form-label text-uppercase">Nome <label
-                                    class="text-danger">*</label></label>
+                                    class="text-danger m-0">*</label></label>
                             <input type="text" class="form-control" id="nome" name="nome">
                         </div>
-                        <div class="col-6">
+                        <div class="col-4">
                             <label for="email" class="form-label text-uppercase">Email <label
-                                    class="text-danger">*</label></label>
+                                    class="text-danger m-0">*</label></label>
                             <input type="email" class="form-control" id="email" name="email">
                         </div>
-                        <div class="col-6">
-                            <label for="cpf" class="form-label text-uppercase">CPF <label
-                                    class="text-danger">*</label></label>
-                            <input type="text" class="form-control" id="cpf" name="cpf">
-                        </div>
-                        <div class="col-6">
+                        <div class="col-4">
                             <label for="telefone" class="form-label text-uppercase">TELEFONE</label>
                             <input type="text" class="form-control" id="telefone" name="telefone">
-                        </div>
-                        <div class="col-4">
-                            <label for="cep" class="form-label text-uppercase">CEP</label>
-                            <input type="text" class="form-control" id="cep" value="" size="10" maxlength="9"
-                                onblur="pesquisacep(this.value);" name="cep">
-                        </div>
-                        <div class="col-4">
-                            <label for="uf" class="form-label text-uppercase">UF</label>
-                            <input type="text" class="form-control" id="uf" name="uf">
-                        </div>
-                        <div class="col-4">
-                            <label for="cidade" class="form-label text-uppercase">Cidade</label>
-                            <input type="text" class="form-control" id="cidade" name="cidade">
-                        </div>
-                        <div class="col-6">
-                            <label for="rua" class="form-label text-uppercase">RUA</label>
-                            <input type="text" class="form-control" id="rua" name="rua">
-                        </div>
-                        <div class="col-4">
-                            <label for="bairro" class="form-label text-uppercase">Bairro</label>
-                            <input type="text" class="form-control" id="bairro" name="bairro">
-                        </div>
-                        <div class="col-2">
-                            <label for="numero" class="form-label text-uppercase">Número</label>
-                            <input type="text" class="form-control" id="numero" name="numero">
-                        </div>
-                        <div class="col-12">
-                            <label for="complemento" class="form-label text-uppercase">Complemento</label>
-                            <input type="text" class="form-control" id="complemento" name="complemento">
                         </div>
                         <div class="col-12">
                             <label for="complemento" class="form-label text-uppercase">Observações</label>
@@ -180,13 +146,10 @@
     <div class="modal" id="myModal">
         <div class="modal-dialog">
             <div class="modal-content">
-
                 <!-- Cabeçalho do Modal -->
                 <div class="modal-header">
-                    <h4 class="modal-title">Formulário UTM</h4>
                     <button type="button" class="close" data-dismiss="modal">&times;</button>
                 </div>
-
                 <!-- Corpo do Modal -->
                 <div class="modal-body">
                     <form>
@@ -205,13 +168,11 @@
                         </div>
                     </form>
                 </div>
-
                 <!-- Rodapé do Modal -->
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
                     <button type="button" onclick="buscaUtm()" class="btn btn-primary">Buscar</button>
                 </div>
-
             </div>
         </div>
     </div>

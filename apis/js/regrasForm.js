@@ -3,7 +3,6 @@ $("#enviar").on("click", function () {
     $("#enviar").attr("disabled", true);
 
     var nome = $("#nome").val();
-    var cpf = $("#cpf").val();
     var email = $("#email").val();
     var termos = $('#check1').map(function (i, el) {
         if ($(el).is(':checked')) {
@@ -11,7 +10,7 @@ $("#enviar").on("click", function () {
         }
     }).get();
 
-    if (nome != '' && cpf != '' && email != '' && termos.length == 1) {
+    if (nome != '' && email != '' && termos.length == 1) {
         var collection = {
             "type": "FeatureCollection",
             "features": []
@@ -43,8 +42,7 @@ $("#enviar").on("click", function () {
         var dados = new FormData(myForm);
         var blob = new Blob([JSON.stringify(collection)], { type: "application/json" });
         dados.append("file", blob, 'vcar.geojson');
-        console.log(collection);
-        return;
+
         $.ajax({
             url: '../apis/ajax/enviarEmail.php',
             type: 'POST',
