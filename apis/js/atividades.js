@@ -1574,12 +1574,15 @@ $('#atv').html(
                                     Produção artesanal de bordado em tecido e/ou tear, de cunho social e coletivo.
                                 </option>
                                 <option
-                                    value="Postos de abastecimento com instalações aéreas, cuja capacidade total de armazenamento consiste em até 15 m³ (Exclusivamente destinado ao abastecimento do detentor das instalações, ou seja auto abastecimento)">
+                                    value="Postos de abastecimento com instalações aéreas, cuja capacidade total de armazenamento
+                                     consiste em até 15 m³ (Exclusivamente destinado ao abastecimento do detentor das instalações, ou seja auto abastecimento)">
                                     Postos de abastecimento com instalações aéreas, cuja capacidade total de
                                     armazenamento consiste em até 15 m³ (Exclusivamente destinado ao abastecimento do
                                     detentor das instalações, ou seja auto abastecimento)</option>
                                 <option
-                                    value="Sistemas Simplificados de Abastecimento de Água Composto por captação (açudes ou poços), com capacidade de reserva até 50 m³ podendo ser em um reservatório único ou distribuído, vazão até 3 m³/h, tratamento singelo, rede de distribuição e ligações domiciliares">
+                                    value="Sistemas Simplificados de Abastecimento de Água Composto por captação (açudes ou poços), 
+                                    com capacidade de reserva até 50 m³ podendo ser em um reservatório único ou distribuído, 
+                                    vazão até 3 m³/h, tratamento singelo, rede de distribuição e ligações domiciliares">
                                     Sistemas Simplificados de Abastecimento de Água Composto por captação (açudes ou
                                     poços), com capacidade de reserva até 50 m³ podendo ser em um reservatório único ou
                                     distribuído, vazão até 3 m³/h, tratamento singelo, rede de distribuição e ligações
@@ -1587,7 +1590,9 @@ $('#atv').html(
                                 <option value="Projeto de poços vazão até 2 m³/h (dois metros cúbicos) por hora">Projeto
                                     de poços vazão até 2 m³/h (dois metros cúbicos) por hora</option>
                                 <option
-                                    value="Barramento ou represamento de curso d? água natural, com área inferior a 1ha, exceto em rios e riachos receptores das águas provenientes do projeto de integração do Rio São Francisco sendo vedada a comercialização de bens minerais, além do material lenhoso resultante da limpeza da bacia hidráulica">
+                                    value="Barramento ou represamento de curso d? água natural, com área inferior a 1ha, 
+                                    exceto em rios e riachos receptores das águas provenientes do projeto de integração do 
+                                    Rio São Francisco sendo vedada a comercialização de bens minerais, além do material lenhoso resultante da limpeza da bacia hidráulica">
                                     Barramento ou represamento de curso d? água natural, com área inferior a 1ha, exceto
                                     em rios e riachos receptores das águas provenientes do projeto de integração do Rio
                                     São Francisco sendo vedada a comercialização de bens minerais, além do material
@@ -1613,7 +1618,9 @@ $('#atv').html(
                                     Atividades de produção de artesanato realizadas por associações comunitárias
                                 </option>
                                 <option
-                                    value="Incineração e queima de substâncias químicas, drogas e ou entorpecentes no qual o responsável pela queima ou incineração esteja devidamente licenciado e que, as solicitações para queima/incineração sejam feitas por autoridades policiais ou do judiciário">
+                                    value="Incineração e queima de substâncias químicas, drogas e ou entorpecentes no qual o 
+                                    responsável pela queima ou incineração esteja devidamente licenciado e que, 
+                                    as solicitações para queima/incineração sejam feitas por autoridades policiais ou do judiciário">
                                     Incineração e queima de substâncias químicas, drogas e ou entorpecentes no qual o
                                     responsável pela queima ou incineração esteja devidamente licenciado e que, as
                                     solicitações para queima/incineração sejam feitas por autoridades policiais ou do
@@ -1630,7 +1637,9 @@ $('#atv').html(
                                     que estejam em conformidade com a Lei Federal nº 11.326, de 24 de julho de 2006
                                 </option>
                                 <option
-                                    value="Projeto de instalação de complexo sanitário na zona rural dimensionados de acordo com os critérios técnicos previsto em normas especificas da ABNT e que integrem programas governamentais de infraestrutura de interesse social">
+                                    value="Projeto de instalação de complexo sanitário na zona rural dimensionados
+                                     de acordo com os critérios técnicos previsto em normas especificas da 
+                                     ABNT e que integrem programas governamentais de infraestrutura de interesse social">
                                     Projeto de instalação de complexo sanitário na zona rural dimensionados de acordo
                                     com os critérios técnicos previsto em normas especificas da ABNT e que integrem
                                     programas governamentais de infraestrutura de interesse social</option>
@@ -1645,7 +1654,10 @@ $('#atv').html(
                                     sejam atendidos por rede de coleta de esgotamento sanitário devidamente licenciada
                                 </option>
                                 <option
-                                    value="Reforma de equipamentos públicos para fins de lazer, práticas esportivas e de utilidade pública, tais como, quadras de esportes, praças, campos de futebol, ginásio poliesportivo, pista de skate, portal de entrada do município, em área urbana já servidos de toda infraestrutura, em especial rede de esgoto e coleta de resíduos">
+                                    value="Reforma de equipamentos públicos para fins de lazer, práticas esportivas e de
+                                     utilidade pública, tais como, quadras de esportes, praças, campos de futebol,
+                                      ginásio poliesportivo, pista de skate, portal de entrada do município,
+                                       em área urbana já servidos de toda infraestrutura, em especial rede de esgoto e coleta de resíduos">
                                     Reforma de equipamentos públicos para fins de lazer, práticas esportivas e de
                                     utilidade pública, tais como, quadras de esportes, praças, campos de futebol,
                                     ginásio poliesportivo, pista de skate, portal de entrada do município, em área
@@ -1667,13 +1679,14 @@ $('#atv').html(
                                     value="Pavimentação e Drenagem Superficial de vias públicas com comprimento de até 2500 m">
                                     Pavimentação e Drenagem Superficial de vias públicas com comprimento de até 2500 m
                                 </option>
-                                <option value="" tapa="" buraco",="" reparo="" no="" meio="" fio,="" limpeza="" da=""
-                                    sarjeta,="" desobstrução="" de="" bueiros,="" do="" acostamento,="" reparos="" na=""
-                                    sinalização="" vertical="" e="" horizontal"="">"Tapa buraco", reparo no meio fio,
+                                <option value="Tapa buraco, reparo no meio fio,
+                                limpeza da sarjeta, desobstrução de bueiros, limpeza do acostamento, reparos na
+                                sinalização vertical e horizontal">Tapa buraco, reparo no meio fio,
                                     limpeza da sarjeta, desobstrução de bueiros, limpeza do acostamento, reparos na
                                     sinalização vertical e horizontal</option>
                                 <option
-                                    value="Manutenção de rodovias pavimentadas: serviços de reparo dos defeitos ocasionados pelo desgaste natural, onde se procura reabilitar as funções de trafegabilidade, em caráter preventivo com comprimento até 2500 m">
+                                    value="Manutenção de rodovias pavimentadas: serviços de reparo dos defeitos
+                                     ocasionados pelo desgaste natural, onde se procura reabilitar as funções de trafegabilidade, em caráter preventivo com comprimento até 2500 m">
                                     Manutenção de rodovias pavimentadas: serviços de reparo dos defeitos ocasionados
                                     pelo desgaste natural, onde se procura reabilitar as funções de trafegabilidade, em
                                     caráter preventivo com comprimento até 2500 m</option>
@@ -1689,7 +1702,8 @@ $('#atv').html(
                                     corte/supressão de arvores e vegetação, nem transposição de áreas de preservação
                                     permanente</option>
                                 <option
-                                    value="Programas governamentais de interesse social que visem a Implantação e manutenção de linhas de distribuição com tensão até 15 kV para fins de eletrificação rural em que não ocorra corte/supressão de árvores e vegetação, nem transposição de áreas de preservação permanente">
+                                    value="Programas governamentais de interesse social que visem a Implantação
+                                     e manutenção de linhas de distribuição com tensão até 15 kV para fins de eletrificação rural em que não ocorra corte/supressão de árvores e vegetação, nem transposição de áreas de preservação permanente">
                                     Programas governamentais de interesse social que visem a Implantação e manutenção de
                                     linhas de distribuição com tensão até 15 kV para fins de eletrificação rural em que
                                     não ocorra corte/supressão de árvores e vegetação, nem transposição de áreas de
@@ -1699,7 +1713,8 @@ $('#atv').html(
                                     Os sistemas de rádio enlace ponto-a-ponto que possua comprovação de licenciamento da
                                     estrutura</option>
                                 <option
-                                    value="Estações Transmissoras de radiocomunicação com Potência Isotropicamente irradiada menor ou igual a 4 W (36dBm) e distância mínima entre a antena e o local onde a população em geral possa estar exposta de 1 (um) m">
+                                    value="Estações Transmissoras de radiocomunicação com Potência
+                                     Isotropicamente irradiada menor ou igual a 4 W (36dBm) e distância mínima entre a antena e o local onde a população em geral possa estar exposta de 1 (um) m">
                                     Estações Transmissoras de radiocomunicação com Potência Isotropicamente irradiada
                                     menor ou igual a 4 W (36dBm) e distância mínima entre a antena e o local onde a
                                     população em geral possa estar exposta de 1 (um) m</option>
@@ -1806,10 +1821,12 @@ $('#atv').html(
                                 <option value="Flores ornamentais em estufas em área até 0,5ha">Flores ornamentais em
                                     estufas em área até 0,5ha</option>
                                 <option
-                                    value="Atividades de floricultura e fruticultura irrigada de até 3,0 ha (três hectares) por beneficiário de projetos coletivos de agricultura familiar, sem uso intensivo de agrotóxico e com sistema de irrigação localizada (gotejamento, micro aspersão, etc);">
+                                    value="Atividades de floricultura e fruticultura irrigada de 
+                                    até 3,0 ha (três hectares) por beneficiário de projetos coletivos de
+                                     agricultura familiar, sem uso intensivo de agrotóxico e com sistema de irrigação localizada (gotejamento, micro aspersão, etc)">
                                     Atividades de floricultura e fruticultura irrigada de até 3,0 ha (três hectares) por
                                     beneficiário de projetos coletivos de agricultura familiar, sem uso intensivo de
-                                    agrotóxico e com sistema de irrigação localizada (gotejamento, micro aspersão, etc);
+                                    agrotóxico e com sistema de irrigação localizada (gotejamento, micro aspersão, etc)
                                 </option>
                                 <option
                                     value="Edificação de unidade familiar em área com infraestrutura incompleta, área construída de até 120m²">

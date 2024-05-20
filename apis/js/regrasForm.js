@@ -41,6 +41,7 @@ $("#enviar").on("click", function () {
 
 
         atividades = $('#atv').val();
+        atividades = atividades.join(';;')
 
         var myForm = document.getElementById('frm');
         var dados = new FormData(myForm);
