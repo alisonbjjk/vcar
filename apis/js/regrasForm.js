@@ -1,5 +1,6 @@
 // Enviar
 $("#enviar").on("click", function () {
+
     $("#enviar").attr("disabled", true);
 
     var nome = $("#nome").val();
@@ -38,10 +39,14 @@ $("#enviar").on("click", function () {
             return;
         }
 
+
+        atividades = $('#atv').val();
+
         var myForm = document.getElementById('frm');
         var dados = new FormData(myForm);
         var blob = new Blob([JSON.stringify(collection)], { type: "application/json" });
         dados.append("file", blob, 'vcar.geojson');
+        dados.append('atividades', atividades);
 
         $.ajax({
             url: '../apis/ajax/enviarEmail.php',
@@ -156,24 +161,91 @@ function pesquisacep(valor) {
 $('#telefone').mask('(99) 99999-9999')
 $('#cpf').mask('999.999.999-99')
 
+
+function dmsToDecimal(degrees, minutes, seconds, direction) {
+    var decimal = degrees + minutes / 60 + seconds / 3600;
+    if (direction == "S" || direction == "W") {
+        decimal = decimal * -1;
+    }
+    return decimal;
+}
+
+function parseDMS(dmsString) {
+    var parts = dmsString.split(/[^\d\w]+/);
+    var degrees = parseInt(parts[0], 10);
+    var minutes = parseInt(parts[1], 10);
+    var seconds = parseFloat(`${parts[2]}.${parts[3]}`);
+    var direction = parts[4];
+    return dmsToDecimal(degrees, minutes, seconds, direction);
+}
+
+$("#tipoCoord").change(function (e) {
+    var tipo = $("#tipoCoord").val();
+    if (tipo === 'utm') {
+        $("#btnCoord").attr("disabled", false);
+        $("#divUtm").removeClass('d-none');
+        $("#divGrau").addClass('d-none');
+        $("#divLatLong").addClass('d-none');
+    } else if (tipo === 'grau') {
+        $("#btnCoord").attr("disabled", false);
+        $("#divGrau").removeClass('d-none');
+        $("#divUtm").addClass('d-none');
+        $("#divLatLong").addClass('d-none');
+    } else if (tipo === 'latLong') {
+        $("#btnCoord").attr("disabled", false);
+        $("#divLatLong").removeClass('d-none');
+        $("#divUtm").addClass('d-none');
+        $("#divGrau").addClass('d-none');
+
+    }
+})
+
 // Buscar com UTM
 function buscaUtm() {
     var utmX = document.getElementById('utmX').value
     var utmY = document.getElementById('utmY').value
     var utmZona = document.getElementById('utmZone').value
+    var utmZona = document.getElementById('utmZone').value
+    var tipo = document.getElementById('tipoCoord').value
 
-    if (utmX == '' && utmY == '' && utmZona == '') {
+    var S = document.getElementById('grauS').value
+    var W = document.getElementById('grauW').value
+
+    var lat1 = document.getElementById('lat').value
+    var long1 = document.getElementById('long').value
+
+    if (S != '' && W != '' && tipo === 'grau') {
+        var lat = parseDMS(`${S} S`);
+        var lon = parseDMS(`${W} W`);
+
+        drawnItems.clearLayers();
+        var geojsonLayers = L.marker([lat, lon]).addTo(drawnItems);
+        map.setView([lat, lon], 15);
+        $('.modal').modal('hide');
+
+    } else if (utmX != '' && utmY != '' && utmZona != '' && tipo === "utm") {
+        var utm = `+proj=utm +zone=${parseInt(utmZona)} +south +ellps=GRS67 +units=m +no_defs`;
+        var wgs84 = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs";
+        var LatLong = proj4(utm, wgs84, [parseInt(utmX), parseInt(utmY)]);
+
+        drawnItems.clearLayers();
+
+        var geojsonLayers = L.marker([LatLong[1], LatLong[0]]).addTo(drawnItems);
+        map.setView([LatLong[1], LatLong[0]], 15);
+        $('.modal').modal('hide');
+
+    } else if (lat1 != '' && long1 != '' && tipo === "latLong") {
+
+        drawnItems.clearLayers();
+        var geojsonLayers = L.marker([lat1, long1]).addTo(drawnItems);
+        map.setView([lat1, long1], 15);
+        $('.modal').modal('hide');
+
+    } else {
         Swal.fire({
             icon: "error",
             title: "Atenção...",
             text: "Todos os campos são obrigatórios!",
         });
-    } else {
-        var utm = `+proj=utm +zone=${parseInt(utmZona)} +south +ellps=GRS67 +units=m +no_defs`;
-        var wgs84 = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs";
-        var LatLong = proj4(utm, wgs84, [parseInt(utmX), parseInt(utmY)]);
-        var geojsonLayers = L.marker([LatLong[1], LatLong[0]]).addTo(drawnItems);
-        map.setView([LatLong[1], LatLong[0]], 15);
-        $('.modal').modal('hide');
     }
 }

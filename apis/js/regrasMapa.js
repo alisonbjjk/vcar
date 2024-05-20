@@ -40,6 +40,7 @@ const options = {
 
 function success(pos) {
     const crd = pos.coords;
+    drawnItems.clearLayers();
     var mak = drawnItems.addLayer(L.marker([crd.latitude, crd.longitude]));
     map.setView([crd.latitude, crd.longitude], 18);
 }
@@ -50,7 +51,30 @@ function error(err) {
 
 
 function localAtual() {
-    navigator.geolocation.getCurrentPosition(success, error, options);
+    Swal.fire({
+        icon: "info",
+        title: "Atenção...",
+        text: "Verifique com atenção a coordenada inserida, pois há possibilidade de ocorrer imprecisão na busca da sua localização. Caso isso ocorra, você tem a opção de ajustar o ponto utilizando a ferramenta \"Editar Camada\", localizada no canto superior esquerdo do mapa.",
+    }).then(function (isConfirm) {
+        navigator.geolocation.getCurrentPosition(success, error, options);
+    });
+}
+
+function resetar() {
+    Swal.fire({
+        title: "Deseja Atualizar a Página?",
+        showCancelButton: true,
+        confirmButtonText: "Atualizar",
+        cancelButtonText: `Cancelar`
+    }).then((result) => {
+        /* Read more about isConfirmed, isDenied below */
+        if (result.isConfirmed) {
+            window.location.reload(true)
+        } else if (result.isDenied) {
+            Swal.fire("Changes are not saved", "", "info");
+        }
+    });
+
 }
 // Fim localizacaoAtual
 
@@ -65,7 +89,6 @@ $("#tipoMapa").on("change", "", function (e) {
     });
 
     map.addLayer(baselayer);
-    limites();
 });
 // Fim mudarMapa
 
@@ -222,29 +245,37 @@ L.drawLocal = {
 map.addControl(drawControl);
 
 // Variável para armazenar o marcador desenhado
-var drawnMarker = null;
 map.on('draw:created', function (e) {
     var layer = e.layer;
+
+    function isGroupEmpty(group) {
+        return group.getLayers().length === 0;
+    }
+
+    if (isGroupEmpty(drawnItems)) {
+        var teste = false;
+    } else {
+        var teste = true;
+    }
+
+    drawnItems.clearLayers();
     drawnItems.addLayer(layer);
 
     if (layer instanceof L.Marker) {
-        if (drawnMarker) {
+        if (teste) {
             // Remova o marcador anterior, se existir
             Swal.fire({
                 icon: "error",
                 title: "Atenção...",
                 text: "A área selecionada excede uma marcação. Por favor, para mais marcações, entre em contato com nossa equipe para contratar uma análise que atenda à área requisitada e tenha o benefício de uma análise mais completa!",
             });
-            map.removeLayer(drawnMarker);
         }
         var layer = e.layer;
-        drawnMarker = layer;
     } else {
         // Verifique a área do polígono desenhado
         var area = L.GeometryUtil.geodesicArea(layer.getLatLngs()[0]);
         // Converta a área para hectares (1 metro quadrado = 0.0001 hectares)
         var areaHectares = area * 0.0001;
-
         // Se a área for maior que 5 hectares, informe ao usuário e limpe a área desenhada
         if (areaHectares > 5) {
             Swal.fire({

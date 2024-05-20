@@ -17,6 +17,10 @@
     <link href='https://api.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v1.0.1/leaflet.fullscreen.css'
         rel='stylesheet' />
     <link rel="stylesheet" href="//norkart.github.io/Leaflet-MiniMap/Control.MiniMap.css" />
+
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/css/bootstrap-select.min.css">
+
     <style>
         #map {
             height: 600px;
@@ -51,6 +55,31 @@
             width: calc(2rem + 0.75rem);
             border-radius: 3rem;
         }
+
+        .swal2-html-container {
+            text-align: justify !important;
+        }
+
+        .bootstrap-select .dropdown-menu li a {
+            white-space: normal;
+        }
+
+        .bootstrap-select .dropdown-toggle:focus {
+            border-color: #252525;
+            /* Cor da borda ao focar */
+            box-shadow: 0 0 0 0.2rem rgba(0, 0, 0, 0.25);
+            /* Sombra do contorno ao focar */
+        }
+
+        .bootstrap-select .dropdown-menu {
+            border-color: #252525;
+            /* Cor da borda do menu dropdown */
+        }
+
+        .bootstrap-select .dropdown-menu li a {
+            border-bottom: 1px solid #252525;
+            /* Cor da linha inferior dos itens */
+        }
     </style>
 </head>
 
@@ -77,11 +106,13 @@
                     <div class="row g-3">
                         <div class="d-flex justify-content-between">
                             <div class="">
-                                <button class="btn btn-sm btn-primary" type="button" onclick="localAtual()">Local
-                                    Atual</button>
+                                <button class="btn btn-sm btn-primary" type="button" onclick="localAtual()">
+                                    Buscar Localização Atual
+                                </button>
                                 <button class="btn btn-sm btn-primary" type="button"
-                                    onclick="$('#myModal').modal()">Buscar
-                                    UTM</button>
+                                    onclick="$('#myModal').modal()">Buscar Coordenada Específica</button>
+                                <button class="btn btn-sm btn-primary" type="button"
+                                    onclick="resetar()">Atualizar</button>
                             </div>
                             <div class="col-3">
                                 <select class="form-select form-select-sm" id="tipoMapa">
@@ -109,6 +140,15 @@
                             <label for="telefone" class="form-label text-uppercase">TELEFONE</label>
                             <input type="text" class="form-control" id="telefone" name="telefone">
                         </div>
+
+                        <div class="col-12">
+                            <label for="complemento" class="form-label text-uppercase">Tipo de Atividade</label>
+                            <select class="selectpicker form-control" multiple title="Atividades"
+                                data-live-search="true" style="width: 20px" id="atv" name="atv">
+
+                            </select>
+                        </div>
+
                         <div class="col-12">
                             <label for="complemento" class="form-label text-uppercase">Observações</label>
                             <textarea class="form-control" id="motivo" name="motivo" rows="4" cols="50"></textarea>
@@ -148,37 +188,93 @@
             <div class="modal-content">
                 <!-- Cabeçalho do Modal -->
                 <div class="modal-header">
+                    <h4 class="mt-2 text-muted text-uppercase">Buscar Coordenada</h4>
                     <button type="button" class="close" data-dismiss="modal">&times;</button>
                 </div>
                 <!-- Corpo do Modal -->
                 <div class="modal-body">
+                    <div class="form-group">
+                        <label for="tipoCoord">Tipo de coordenada</label>
+                        <select id="tipoCoord" class="form-control col-6">
+                            <option selected disabled>Selecionar tipo</option>
+                            <option value="utm">UTM</option>
+                            <option value="grau">Geográfica (Graus, Minutos e Segundos</option>
+                            <option value="latLong">Geográfica (Graus Decimais)</option>
+                        </select>
+                    </div>
                     <form>
-                        <div class="form-group">
-                            <label for="utmX">UTM X:</label>
-                            <input type="text" class="form-control" id="utmX" placeholder="Insira a coordenada UTM X">
+                        <div id="divUtm" class="d-none">
+                            <div class="form-group">
+                                <label for="utmX">Longitude<label class="text-danger">*</label></label>
+                                <input type="text" class="form-control" id="utmX" placeholder="Exemplo: (730484,00)">
+                            </div>
+                            <div class="form-group">
+                                <label for="utmY">Latitude<label class="text-danger">*</label></label>
+                                <input type="text" class="form-control" id="utmY" placeholder="Exemplo: (9355447,00)">
+                            </div>
+                            <div class="form-group">
+                                <label for="utmZone">Zona <label class="text-danger">*</label></label>
+                                <select id="utmZone" class="form-control col-6">
+                                    <option value="" selected disabled>Selecionar zona</option>
+                                    <option value="18">18</option>
+                                    <option value="19">19</option>
+                                    <option value="20">20</option>
+                                    <option value="21">21</option>
+                                    <option value="22">22</option>
+                                    <option value="23">23</option>
+                                    <option value="24">24</option>
+                                    <option value="25">25</option>
+                                </select>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label for="utmY">UTM Y:</label>
-                            <input type="text" class="form-control" id="utmY" placeholder="Insira a coordenada UTM Y">
+                        <div id="divGrau" class="d-none">
+                            <div class="form-group">
+                                <label for="grauS">Longitude<label class="text-danger">*</label></label>
+                                <input type="text" class="form-control" id="grauS"
+                                    placeholder="Exemplo: (5⁰49'36.12'')">
+                            </div>
+                            <div class="form-group">
+                                <label for="grauW">Latitude<label class="text-danger">*</label></label>
+                                <input type="text" class="form-control" id="grauW" placeholder="Exemplo: (36⁰55'6.9'')">
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label for="utmZone">Zona UTM:</label>
-                            <input type="number" class="form-control" id="utmZone" placeholder="Insira a zona UTM"
-                                min="1" max="60">
+                        <div id="divLatLong" class="d-none">
+                            <div class="form-group">
+                                <label for="long">Longitude <label class="text-danger">*</label></label>
+                                <input type="text" class="form-control" id="long" placeholder="Exemplo: (-36.918218)">
+                            </div>
+                            <div class="form-group">
+                                <label for="lat">Latitude <label class="text-danger">*</label></label>
+                                <input type="text" class="form-control" id="lat" placeholder="Exemplo: (-5.826700)">
+                            </div>
                         </div>
                     </form>
                 </div>
                 <!-- Rodapé do Modal -->
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
-                    <button type="button" onclick="buscaUtm()" class="btn btn-primary">Buscar</button>
+                    <button type="button" id="btnCoord" onclick="buscaUtm()" class="btn btn-primary"
+                        disabled>Buscar</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"
-        integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/js/bootstrap-select.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.6/js/bootstrap-select.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.6/css/bootstrap-select.min.css"
+        rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/css/bootstrap.min.css"
+        rel="stylesheet" />
+    <script>
+        $(document).ready(function () {
+            $('.selectpicker').selectpicker();
+        });
+    </script>
+    <script src="../apis/js/atividades.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js"
         integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
         crossorigin="anonymous"></script>
@@ -193,10 +289,7 @@
     <script src="../apis/js/L.TileLayer.BetterWMS.js"></script>
     <script src='https://api.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v1.0.1/Leaflet.fullscreen.min.js'></script>
     <script src="https://norkart.github.io/Leaflet-MiniMap/Control.MiniMap.js" crossorigin="anonymous"></script>
-
     <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6.3.0/turf.min.js"></script>
-
-
     <script src="../apis/js/kmlToGeojson.js"></script>
     <script src="../apis/js/imporShp.js"></script>
     <script src="../apis/js/baseMapas.js"></script>
