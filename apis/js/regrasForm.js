@@ -41,6 +41,7 @@ $("#enviar").on("click", function () {
 
 
         atividades = $('#atv').val();
+        var tipoMap = $("#tipoMapa option:selected").text();
         atividades = atividades.join(';;')
 
         var myForm = document.getElementById('frm');
@@ -48,6 +49,7 @@ $("#enviar").on("click", function () {
         var blob = new Blob([JSON.stringify(collection)], { type: "application/json" });
         dados.append("file", blob, 'vcar.geojson');
         dados.append('atividades', atividades);
+        dados.append('tipoMapa', tipoMap);
 
         $.ajax({
             url: '../apis/ajax/enviarEmail.php',

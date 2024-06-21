@@ -9,12 +9,12 @@ require_once("../phpmailer/exception.php");
 require_once("../phpmailer/credenciais.php");
 require_once("./function.php");
 
-
 $nome = filter_input(INPUT_POST, 'nome');
 $email = filter_input(INPUT_POST, 'email');
 $telefone = filter_input(INPUT_POST, 'telefone');
 $atividades = filter_input(INPUT_POST, 'atividades');
 $motivo = filter_input(INPUT_POST, 'motivo');
+$tipoMapa = filter_input(INPUT_POST, 'tipoMapa');
 date_default_timezone_set('America/Sao_Paulo');
 $data = date('d/m/Y H:i:s');
 
@@ -57,6 +57,7 @@ $mail->Body = "
 <h3>Telefone: <strong>{$telefone}</strong></h3></br>
 <h3>Atividades: <strong>{$atividades}</strong></h3></br>
 <h3>Motivo: <strong>{$motivo}</strong></h3></br>
+<h3>Tipo Mapa: <strong>{$tipoMapa}</strong></h3></br>
 ";
 
 $enviar = enviarEmail($email, $data);
