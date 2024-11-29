@@ -20,7 +20,7 @@ $data = date('d/m/Y H:i:s');
 
 $validaCaptcha = false;
 if (isset($_POST['g-recaptcha-response'])) {
-    $getResponse = "https://www.google.com/recaptcha/api/siteverify?secret=6LefpFApAAAAANBt_axCVIK1LeseNp_I_mw8-BbB&response={$_POST['g-recaptcha-response']}";
+    $getResponse = "https://www.google.com/recaptcha/api/siteverify?secret=6LcuEIQqAAAAAJGsQpKHKe8ZwJY1BGGB0CfhLeal&response={$_POST['g-recaptcha-response']}";
     $GoogleResponse = (file_get_contents($getResponse));
     $captcha = json_decode($GoogleResponse);
     if ($captcha->success == false) {
@@ -36,9 +36,9 @@ $mail->Port = 465;
 $mail->SMTPSecure = 'ssl';
 $mail->SMTPAuth = true;
 $mail->SMTPDebug = 0;
-$mail->Username = 'contato@4four.tech';
+$mail->Username = '4four.tech@4four.tech';
 $mail->Password = '';
-$mail->setFrom('contato@4four.tech', 'contato');
+$mail->setFrom('4four.tech@4four.tech', 'contato');
 $mail->addReplyTo($email, 'contato');
 
 if (isset($_FILES['file']) && $_FILES['file']['error'] == UPLOAD_ERR_OK) {

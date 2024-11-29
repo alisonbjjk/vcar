@@ -18,9 +18,9 @@ function enviarEmail($email, $data, $html = "")
     $mail->SMTPSecure = 'ssl';
     $mail->SMTPAuth = true;
     $mail->SMTPDebug = 0;
-    $mail->Username = 'contato@4four.tech';
+    $mail->Username = '4four.tech@4four.tech';
     $mail->Password = '';
-    $mail->setFrom('contato@4four.tech', 'CONDIÇÕES AMBIENTAIS');
+    $mail->setFrom('4four.tech@4four.tech', 'CONDIÇÕES AMBIENTAIS');
     $mail->addReplyTo('condicoesambientais@gmail.com', 'CONDIÇÕES AMBIENTAIS');
     $mail->addAddress($email);
 
