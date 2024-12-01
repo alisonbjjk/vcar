@@ -11,8 +11,9 @@ require_once("./function.php");
 
 $nome = filter_input(INPUT_POST, 'nome');
 $email = filter_input(INPUT_POST, 'email');
-$cpf = filter_input(INPUT_POST, 'cpf');
 $processo = filter_input(INPUT_POST, 'processo');
+$tipoMapa = filter_input(INPUT_POST, 'tipoMapa');
+
 date_default_timezone_set('America/Sao_Paulo');
 $data = date('d/m/Y H:i:s');
 
@@ -34,9 +35,9 @@ $mail->Port = 465;
 $mail->SMTPSecure = 'ssl';
 $mail->SMTPAuth = true;
 $mail->SMTPDebug = 0;
-$mail->Username = 'contato@4four.tech';
+$mail->Username = 'contato@condicoesambientais.com.br';
 $mail->Password = '';
-$mail->setFrom('contato@4four.tech', 'contato');
+$mail->setFrom('contato@condicoesambientais.com.br', 'contato');
 $mail->addReplyTo($email, 'contato');
 
 if (isset($_FILES['file']) && $_FILES['file']['error'] == UPLOAD_ERR_OK) {
@@ -55,9 +56,10 @@ $mail->Subject = "(PRO) Nova Entrada de Formulário {$data}";
 $mail->Body = "
 <h2>Dados do novo Contato</h2></br>
 <h3>Nome: <strong>{$nome}</strong></h3></br>
-<h3>CPF: <strong>{$cpf}</strong></h3></br>
 <h3>Email: <strong>{$email}</strong></h3></br>
 <h3>Nº do Processo: <strong>{$processo}</strong></h3>
+<h3>Tipo Mapa: <strong>{$tipoMapa}</strong></h3></br>
+
 ";
 $enviar = enviarEmail($email, $data);
 

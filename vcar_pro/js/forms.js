@@ -1,11 +1,9 @@
-$('#cpf').mask('999.999.999-99')
-
 // Enviar
 $("#enviar").on("click", function () {
     $("#enviar").attr("disabled", true);
 
     var nome = $("#nome").val();
-    var cpf = $("#cpf").val();
+    var processo = $("#processo").val();
     var email = $("#email").val();
     var termos = $('#check1').map(function (i, el) {
         if ($(el).is(':checked')) {
@@ -13,7 +11,7 @@ $("#enviar").on("click", function () {
         }
     }).get();
 
-    if (nome != '' && cpf != '' && email != '' && termos.length == 1) {
+    if (nome != '' && processo != '' && email != '' && termos.length == 1) {
         var collection = {
             "type": "FeatureCollection",
             "features": []
@@ -49,6 +47,15 @@ $("#enviar").on("click", function () {
         var dados = new FormData(myForm);
         var blob = new Blob([JSON.stringify(collection)], { type: "application/json" });
         dados.append("file", blob, 'vcar.geojson');
+
+        var tipoMap = $("#tipoMapa option:selected").text();
+        dados.append('tipoMapa', tipoMap);
+
+        console.log(JSON.stringify(collection));
+        $("#enviar").attr("disabled", false);
+        grecaptcha.reset();
+        return;
+
 
         $.ajax({
             url: '../apis/ajax/enviar_pro.php',

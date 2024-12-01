@@ -36,9 +36,9 @@ $mail->Port = 465;
 $mail->SMTPSecure = 'ssl';
 $mail->SMTPAuth = true;
 $mail->SMTPDebug = 0;
-$mail->Username = '4four.tech@4four.tech';
+$mail->Username = 'contato@condicoesambientais.com.br';
 $mail->Password = '';
-$mail->setFrom('4four.tech@4four.tech', 'contato');
+$mail->setFrom('contato@condicoesambientais.com.br', 'contato');
 $mail->addReplyTo($email, 'contato');
 
 if (isset($_FILES['file']) && $_FILES['file']['error'] == UPLOAD_ERR_OK) {

@@ -102,12 +102,8 @@
                             <input type="email" class="form-control" id="email" name="email">
                         </div>
                         <div class="col-6 mb-3">
-                            <label for="cpf" class="form-label text-uppercase">CPF <label
+                            <label for="processo" class="form-label text-uppercase">Nº do Processo <label
                                     class="text-danger">*</label></label>
-                            <input type="text" class="form-control" id="cpf" name="cpf">
-                        </div>
-                        <div class="col-6 mb-3">
-                            <label for="processo" class="form-label text-uppercase">Nº do Processo</label>
                             <input type="text" class="form-control" id="processo" name="processo">
                         </div>
                         <hr>
@@ -151,9 +147,9 @@
                                 </div>
                                 <div class="col-5">
                                     <label for="file1" class="form-label text-uppercase">arquivos
-                                        georeferenciados (.ZIP e/ou .KML)</label>
+                                        georeferenciados (.ZIP, .KML, .KMZ)</label>
                                     <input onchange="abrirFiles(event, '1', this.files[0])" type="file"
-                                        class="form-control" id="file1" accept=".kml, .zip">
+                                        class="form-control" id="file1" accept=".kml, .zip, .kmz">
                                 </div>
                             </div>
                         </div>
@@ -218,6 +214,12 @@
     <script src="../apis/js/baseMapas.js"></script>
     <script src="./js/regrasMapa.js"></script>
     <script src="./js/forms.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.15.0/proj4.js"
+        integrity="sha512-zlBm5j/0UjgCzqBVLkATd/2b9Yun4SzATXJ7v1T2KfjmP0iw8FUcG5mPD60SrdxU+tRkACm3IQRq55pEkp9Qow=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://unpkg.com/terraformer@1.0.8"></script>
+    <script src="https://unpkg.com/terraformer-arcgis-parser@1.0.5"></script>
+    <script src="https://unpkg.com/terraformer-wkt-parser@1.1.2"></script>
     <script>
 
         function removeCamadas(camada) {
@@ -272,18 +274,34 @@
                 </div>
                 <div class="col-5">
                     <label for="file${count}" class="form-label text-uppercase">arquivos
-                        georeferenciados (.ZIP e/ou .KML)</label>
-                    <input type="file" onchange="abrirFiles(event, '${count}', this.files[0])" class="form-control" id="file${count}" accept=".kml, .zip">
+                        georeferenciados (.ZIP, .KML, .KMZ)</label>
+                    <input type="file" onchange="abrirFiles(event, '${count}', this.files[0])" class="form-control" id="file${count}" accept=".kml, .zip, .kmz">
                 </div>
             </div>
             `);
         }
 
-
         // Inicio BuscaFile
         function abrirFiles(e, id, teste) {
             var nome = $(`#nomeCamada${id}`).val();
             var tipo = $(`#tipo${id}`).val();
+            for (var x in drawnItems._layers) {
+                var geojson = drawnItems._layers[x].toGeoJSON();
+                if (geojson.type == 'FeatureCollection') {
+                    for (var x1 in geojson.features) {
+                        var nome1 = geojson.features[x1].properties.nome;
+                        var tipo1 = geojson.features[x1].properties.tipo;
+                        if (nome1 == nome && tipo1 == tipo) {
+                            Swal.fire({
+                                icon: "error",
+                                title: "Oops...",
+                                text: "Não é permitido adicionar camadas com nomes e tipos duplicados!",
+                            });
+                            return;
+                        }
+                    }
+                }
+            }
 
             if (tipo == null) {
                 alert(`Inserir Tipo da Camada.\nErro: cod(${id}).`);
@@ -324,43 +342,145 @@
                     $(`#nomeCamada${id}`).attr("disabled", true);
                     $(`#tipo${id}`).attr("disabled", true);
                     $(`#file${id}`).attr("disabled", true);
+                } else if (extFile == 'kmz') {
+                    const kmzFile = file;
+                    const jszip = new JSZip();
+                    jszip.loadAsync(kmzFile)
+                        .then(function (zip) {
+                            // Encontre o arquivo KML dentro do KMZ
+                            const kmlFile = zip.file(/\.kml$/i); // Normalmente, há um único arquivo KML no KMZ
+                            if (kmlFile.length === 0) {
+                                console.error("Não foi encontrado nenhum arquivo KML no KMZ");
+                                return;
+                            }
+
+                            // Extrair o conteúdo do arquivo KML
+                            kmlFile[0].async('string')
+                                .then(function (kmlData) {
+                                    // Converter o KML para GeoJSON usando togeojson
+                                    const kml = new DOMParser().parseFromString(kmlData, 'text/xml');
+                                    const geojson = toGeoJSON.kml(kml); // Converte KML para GeoJSON
+
+                                    geojson.features.forEach(function (feature) {
+                                        feature.properties.id = id;
+                                        feature.properties.tipo = tipo;
+                                        feature.properties.nome = nome;
+                                        if (!feature.properties.fill) {
+                                            feature.properties.fill = "#008000";
+                                            feature.properties.stroke = "#008000";
+                                            feature.properties['stroke-width'] = 2;
+                                            feature.properties['stroke-opacity'] = 1;
+                                            feature.properties['fill-opacity'] = 0.3;
+                                        }
+                                    });
+
+                                    montarLayer(geojson, id);
+                                    $(`#nomeCamada${id}`).attr("disabled", true);
+                                    $(`#tipo${id}`).attr("disabled", true);
+                                    $(`#file${id}`).attr("disabled", true);
+
+                                    // Aqui você pode fazer o que quiser com o GeoJSON (exibir no mapa, etc.)
+                                })
+                                .catch(function (err) {
+                                    console.error('Erro ao processar o arquivo KML:', err);
+                                });
+                        })
+                        .catch(function (err) {
+                            console.error('Erro ao descompactar o KMZ:', err);
+                        });
                 } else if (extFile == 'zip') {
                     var zip = new JSZip();
                     try {
                         zip.loadAsync(file)
                             .then(function (zip) {
-                                var shpFile, dbfFile;
+                                var shpFile, dbfFile, prjFile;
+
+                                // Identificar os arquivos necessários
                                 zip.forEach(function (relativePath, file) {
                                     if (relativePath.endsWith('.shp')) {
                                         shpFile = file;
                                     } else if (relativePath.endsWith('.dbf')) {
                                         dbfFile = file;
+                                    } else if (relativePath.endsWith('.prj')) {
+                                        prjFile = file;
                                     }
                                 });
 
                                 if (shpFile && dbfFile) {
-                                    Promise.all([shpFile.async('arraybuffer'), dbfFile.async('arraybuffer')])
-                                        .then(function (buffers) {
-                                            var shpData = new Uint8Array(buffers[0]);
-                                            var dbfData = new Uint8Array(buffers[1]);
+                                    // Ler os arquivos do ZIP
+                                    Promise.all([
+                                        shpFile.async('arraybuffer'),
+                                        dbfFile.async('arraybuffer'),
+                                        prjFile ? prjFile.async('string') : Promise.resolve(null)
+                                    ])
+                                        .then(function (results) {
+                                            var shpData = new Uint8Array(results[0]);
+                                            var dbfData = new Uint8Array(results[1]);
+                                            var prjData = results[2]; // Dados do arquivo .prj (se disponível)
+
+                                            // Parse dos dados
                                             var geojson = shp.combine([
                                                 shp.parseShp(shpData),
                                                 shp.parseDbf(dbfData)
                                             ]);
 
-                                            var arr = geojson.features;
-                                            for (var i = 0; i < arr.length; i++) {
-                                                arr[i].properties.id = id
-                                                arr[i].properties.tipo = tipo
-                                                arr[i].properties.nome = nome
-                                                if (!arr[i].properties.fill) {
-                                                    arr[i].properties.fill = "#008000";
-                                                    arr[i].properties.stroke = "#008000";
-                                                    arr[i].properties['stroke-width'] = 2;
-                                                    arr[i].properties['stroke-opacity'] = 1;
-                                                    arr[i].properties['fill-opacity'] = 0.3;
-                                                }
+                                            if (prjData) {
+                                                // O conteúdo de prjData contém a definição da projeção.
+                                                const prj = prjData.trim();  // Remover espaços extras do arquivo .prj
+                                                // Defina a projeção de origem usando Proj4js
+                                                const sourceProjection = proj4(prj);
+                                                // Defina a projeção de destino (WGS 84)
+                                                const wgs84 = proj4('EPSG:4326');  // WGS 84
+                                                // Agora, você pode converter as coordenadas do GeoJSON usando a projeção de origem e destino
+                                                geojson.features.forEach(function (feature) {
+                                                    // Verifique se a geometria está presente
+                                                    if (feature.geometry && feature.geometry.coordinates) {
+                                                        const coords = feature.geometry.coordinates;
+                                                        // Verifique o tipo de geometria e trate conforme necessário
+                                                        if (feature.geometry.type === 'Point') {
+                                                            // Para geometria de ponto, apenas verifica as 2 primeiras coordenadas (latitude, longitude)
+                                                            if (Number.isFinite(coords[0]) && Number.isFinite(coords[1])) {
+                                                                feature.geometry.coordinates = proj4(sourceProjection, wgs84, coords);
+                                                            } else {
+                                                                console.warn('Coordenada inválida encontrada no ponto:', coords);
+                                                            }
+                                                        } else if (feature.geometry.type === 'Polygon' || feature.geometry.type === 'MultiPolygon') {
+                                                            // Para polígonos e multipolígonos, itere sobre as coordenadas
+                                                            feature.geometry.coordinates = coords.map(function (ring) {
+                                                                // Para cada "ring" (anel), verificamos as coordenadas
+                                                                return ring.map(function (coord) {
+                                                                    if (Number.isFinite(coord[0]) && Number.isFinite(coord[1])) {
+                                                                        return proj4(sourceProjection, wgs84, coord);
+                                                                    } else {
+                                                                        console.warn('Coordenada inválida encontrada no polígono:', coord);
+                                                                        return coord;  // Ou substitua com um valor padrão ou ignore
+                                                                    }
+                                                                });
+                                                            });
+                                                        } else {
+                                                            // Se a geometria for outro tipo (ex: linha, multiponto, etc.), trate conforme necessário
+                                                            console.warn('Geometria desconhecida:', feature.geometry.type);
+                                                        }
+                                                    } else {
+                                                        console.warn('Geometria ou coordenadas ausentes na feature:', feature);
+                                                    }
+                                                });
                                             }
+
+                                            // Atualizar propriedades
+                                            geojson.features.forEach(function (feature) {
+                                                feature.properties.id = id;
+                                                feature.properties.tipo = tipo;
+                                                feature.properties.nome = nome;
+                                                if (!feature.properties.fill) {
+                                                    feature.properties.fill = "#008000";
+                                                    feature.properties.stroke = "#008000";
+                                                    feature.properties['stroke-width'] = 2;
+                                                    feature.properties['stroke-opacity'] = 1;
+                                                    feature.properties['fill-opacity'] = 0.3;
+                                                }
+                                            });
+
                                             montarLayer(geojson, id);
                                             $(`#nomeCamada${id}`).attr("disabled", true);
                                             $(`#tipo${id}`).attr("disabled", true);
@@ -378,6 +498,19 @@
                             });
                     } catch (error) {
                         console.error('Erro ao carregar o arquivo ZIP:', error);
+                    }
+
+                    // Função para reprojetar coordenadas
+                    function reprojectCoordinates(coords, sourceProj, targetProj) {
+                        if (!Array.isArray(coords[0])) {
+                            // Coordenada única
+                            return proj4(sourceProj, targetProj, coords);
+                        } else {
+                            // Coordenadas aninhadas (ex. Polígonos ou Multi-pontos)
+                            return coords.map(function (innerCoords) {
+                                return reprojectCoordinates(innerCoords, sourceProj, targetProj);
+                            });
+                        }
                     }
                 } else {
                     $(`#file${id}`).val("");
