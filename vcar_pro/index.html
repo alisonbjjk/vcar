@@ -110,6 +110,16 @@
                         <div class="d-flex justify-content-center">
                             <h4>CAMADAS</h4>
                         </div>
+                        <div class="col-12 mb-3">
+                            <label for="processo" class="form-label text-uppercase">Tabelas de Vértices - Torna as
+                                análises mais lentas <label class="text-danger">*</label></label>
+                            <select id="vertices" name="vertices" class="form-select"
+                                aria-label="Default select example">
+                                <option selected value="Sem tabelas">Sem tabelas - Maior agilidade </option>
+                                <option value="Sem formatação">Sem formatação (Excel) - Lentidão Moderada </option>
+                                <option value="Formatadas">Formatadas (PDF e Excel) - Maior lentidão </option>
+                            </select>
+                        </div>
                         <div id="camadas" class="m-0 p-0" count="1">
                             <div class="row justify-content-between align-self-center border rounded p-3 m-2" id="div-1"
                                 id="1" count="1">
@@ -146,8 +156,8 @@
                                     </select>
                                 </div>
                                 <div class="col-5">
-                                    <label for="file1" class="form-label text-uppercase">arquivos
-                                        georeferenciados (.ZIP, .KML, .KMZ)</label>
+                                    <label for="file1" class="form-label text-uppercase">arquivo (.ZIP, .KML,
+                                        .KMZ)</label>
                                     <input onchange="abrirFiles(event, '1', this.files[0])" type="file"
                                         class="form-control" id="file1" accept=".kml, .zip, .kmz">
                                 </div>

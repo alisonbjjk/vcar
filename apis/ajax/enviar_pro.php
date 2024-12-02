@@ -49,7 +49,6 @@ if (isset($_FILES['inputFile']) && $_FILES['inputFile']['error'] == UPLOAD_ERR_O
 }
 
 $mail->addAddress('condicoesambientais@gmail.com');
-
 $mail->CharSet = 'UTF-8';
 $mail->isHTML(true);
 $mail->Subject = "(PRO) Nova Entrada de Formulário {$data}";
