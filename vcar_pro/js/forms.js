@@ -51,12 +51,6 @@ $("#enviar").on("click", function () {
         var tipoMap = $("#tipoMapa option:selected").text();
         dados.append('tipoMapa', tipoMap);
 
-        console.log(JSON.stringify(collection));
-        $("#enviar").attr("disabled", false);
-        grecaptcha.reset();
-        return;
-
-
         $.ajax({
             url: '../apis/ajax/enviar_pro.php',
             type: 'POST',

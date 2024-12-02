@@ -561,34 +561,111 @@
                     }
                 }
 
-                var popupContent = `<form action=\"javascript:void(0);\"><table class="table table-striped table-bordered p-0 m-0" style="width:100%">`;
+                var popupContent = `<table id="table_${feature.properties.id}" class="table table-striped table-bordered p-0 m-0" style="width:100%">`;
                 for (var prop in feature.properties) {
                     if (prop != 'id') {
-                        if (prop == 'stroke') {
-                            popupContent += `<tr><td>${prop}</td><td><input type="color" disabled style="width: 100%; height: 15px;" value="${feature.properties[prop]}" /></td></tr>`;
-                        } else if (prop == 'fill') {
-                            popupContent += `
-                            <tr>
-                                <td>${prop}</td>
-                                <td><input type="color" disabled style="width: 100%; height: 15px;" value="${feature.properties[prop]}" /></td>
-                            </tr>`;
+                        if (prop == 'stroke' || prop == 'fill') {
+                            popupContent += `<tr><td>${prop}</td><td><input type="color" id="${prop}" name="${prop}" style="width: 100%; height: 15px;" value="${feature.properties[prop]}" id="${prop}"/></td></tr>`;
+
+                        } else if (prop == 'nome' || prop == 'tipo') {
+                            popupContent += `<tr><td>${prop}</td><td><input type="text" disabled name="${prop}" value="${feature.properties[prop]}" /></td></tr>`;
+
+                        } else if (prop == 'stroke-width' || prop == 'stroke-opacity' || prop == 'fill-opacity') {
+                            popupContent += `<tr><td>${prop}</td><td><input type="text" name="${prop}" value="${feature.properties[prop]}" /></td></tr>`;
+
                         } else {
-                            popupContent += `<tr><td>${prop}</td><td>${feature.properties[prop]}</td></tr>`;
+                            popupContent += `<tr><td>${prop}</td><td><input type="text" disabled name="${prop}" value="${feature.properties[prop]}" /></td></tr>`;
                         }
                     }
                 }
-                popupContent += `</table><hr>
-                    <div class="row p-0 m-0">`;
-                popupContent += ` <button name="" id="" type="button" class="btn btn-sm btn-primary col mx-1">Salvar</button><button name="" id="" type="button" onclick="map.closePopup()" class="btn btn-sm btn-secondary col mx-1">Cancelar</button>`;
-                popupContent += `<div>`;
-                popupContent += `</form>`;
-                layer.bindPopup(popupContent, { minWidth: 200, maxWidth: 240 });
+                popupContent += `
+                    </table><hr>
+                    <div class="row p-0 m-0">
+                        <button type="button"  onclick="testeform(this, ${feature.properties.id})" class="btn btn-primary col mx-1">Salvar</button>
+                        <button type="button" onclick="map.closePopup()" class="btn btn-sm btn-secondary col mx-1">Cancelar</button>
+                    </div> 
+                `;
+
+                layer.bindPopup(popupContent, { minWidth: 200, maxWidth: 300 });
             });
 
             var bounds = geojsonLayer.getBounds();
             map.fitBounds(bounds);
             var center = bounds.getCenter();
             map.panTo(center);
+        }
+
+        function testeform(select, id) {
+            var inputs = document.querySelectorAll(`#table_${id} input`);
+            var dataObject = {};
+
+            // Itera sobre os inputs e coleta os valores
+            inputs.forEach(input => {
+                dataObject[input.name] = input.value; // Usa o name como chave
+            });
+
+            var newStyle = {
+                color: dataObject['stroke'],
+                weight: dataObject['stroke-width'],
+                opacity: dataObject['stroke-opacity'],
+                fillColor: dataObject['fill'],
+                fillOpacity: dataObject['fill-opacity'],
+            }
+
+            // Modificar style
+            drawnItems.eachLayer(function (layer) {
+                if (layer.options.id === `vcar${id}`) {
+                    layer.setStyle(newStyle);
+                    layer.eachLayer(function (layer) {
+                        feature = layer.feature
+                        feature.properties['stroke'] = newStyle.color;
+                        feature.properties['stroke-width'] = newStyle.weight;
+                        feature.properties['stroke-opacity'] = newStyle.opacity;
+                        feature.properties['fill'] = newStyle.fillColor;
+                        feature.properties['fill-opacity'] = newStyle.fillOpacity;
+
+                        attPopUp(layer, feature)
+                    });
+                }
+            });
+
+        }
+
+        function attPopUp(layer, feature) {
+            var popupContent = `<table id="table_${feature.properties.id}" class="table table-striped table-bordered p-0 m-0" style="width:100%">`;
+            for (var prop in feature.properties) {
+                if (prop != 'id') {
+                    if (prop == 'stroke' || prop == 'fill') {
+                        popupContent += `
+                            <tr>
+                                <td>${prop}</td>
+                                <td>
+                                    <input type="color" id="${prop}" name="${prop}" style="width: 100%; height: 15px;" value="${feature.properties[prop]}" id="${prop}"/>
+                                    </td>
+                            </tr>`;
+                    } else if (prop == 'nome' || prop == 'tipo') {
+                        popupContent += `<tr><td>${prop}</td><td><input type="text" disabled name="${prop}" value="${feature.properties[prop]}" /></td></tr>`;
+                    } else if (prop == 'stroke-width' || prop == 'stroke-opacity' || prop == 'fill-opacity') {
+
+                        popupContent += `<tr><td>${prop}</td><td><input type="text" name="${prop}" value="${feature.properties[prop]}" /></td></tr>`;
+
+                    } else {
+                        popupContent += `<tr><td>${prop}</td><td><input type="text" disabled name="${prop}" value="${feature.properties[prop]}" /></td></tr>`;
+                    }
+                }
+            }
+            popupContent += `
+                </table>
+                <hr>
+                    <div class="row p-0 m-0">
+                        <button type="button"  onclick="testeform(this, ${feature.properties.id})" class="btn btn-primary col mx-1">Salvar</button>
+                        <button type="button" onclick="map.closePopup()" class="btn btn-sm btn-secondary col mx-1">Cancelar</button>
+                    </div> 
+                `;
+            layer.bindPopup(popupContent);
+            setTimeout(() => {
+                layer.openPopup();
+            }, "10");
         }
 
     </script>
