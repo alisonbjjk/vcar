@@ -9,10 +9,15 @@ require_once("../phpmailer/exception.php");
 require_once("../phpmailer/credenciais.php");
 require_once("./function.php");
 
+
+
 $nome = filter_input(INPUT_POST, 'nome');
 $email = filter_input(INPUT_POST, 'email');
 $processo = filter_input(INPUT_POST, 'processo');
 $tipoMapa = filter_input(INPUT_POST, 'tipoMapa');
+$vertices = filter_input(INPUT_POST, 'vertices');
+$curvaNivel = filter_input(INPUT_POST, 'curvaNivel');
+$cota = filter_input(INPUT_POST, 'cota');
 
 date_default_timezone_set('America/Sao_Paulo');
 $data = date('d/m/Y H:i:s');
@@ -56,10 +61,17 @@ $mail->Body = "
 <h2>Dados do novo Contato</h2></br>
 <h3>Nome: <strong>{$nome}</strong></h3></br>
 <h3>Email: <strong>{$email}</strong></h3></br>
-<h3>Nº do Processo: <strong>{$processo}</strong></h3>
+<h3>Nº do Processo: <strong>{$processo}</strong></h3></br>
 <h3>Tipo Mapa: <strong>{$tipoMapa}</strong></h3></br>
+<h3>Tabelas de Vértices: <strong>{$vertices}</strong></h3></br>
+<h3>Resolução das Curvas de Nível (CNs): <strong>{$curvaNivel}</strong></h3></br>
+<h3>Campo com as Cota das CNs: <strong>{$cota}</strong></h3></br>
 
 ";
+
+echo('<pre>');
+print_r($mail->Body);
+die;
 $enviar = enviarEmail($email, $data);
 
 if (!$mail->send()) {
