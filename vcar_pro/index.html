@@ -120,6 +120,16 @@
                                 <option value="Formatadas">Formatadas (PDF e Excel) - Maior lentidão </option>
                             </select>
                         </div>
+                        <div class="col-12 mb-3 row m-0 p-0">
+                            <div class="col-6">
+                                <label for="curvaNivel" class="form-label text-uppercase">Resolução das Curvas de Nível (CNs)</label>
+                                <input class="form-control" type="number" step="0.1" min="0" id="curvaNivel" name="curvaNivel" value="">
+                            </div>
+                            <div class="col-6">
+                                <label for="cota" class="form-label text-uppercase">Campo com as Cota das CNs</label>
+                                <input class="form-control" type="number" step="1" min="0" id="cota" name="cota" value="">
+                            </div>
+                        </div>
                         <div id="camadas" class="m-0 p-0" count="1">
                             <div class="row justify-content-between align-self-center border rounded p-3 m-2" id="div-1"
                                 id="1" count="1">
@@ -477,7 +487,7 @@
                             popupContent += `<tr><td>${prop}</td><td><input type="text" disabled name="${prop}" value="${feature.properties[prop]}" /></td></tr>`;
 
                         } else if (prop == 'stroke-width' || prop == 'stroke-opacity' || prop == 'fill-opacity') {
-                            popupContent += `<tr><td>${prop}</td><td><input type="text" name="${prop}" value="${feature.properties[prop]}" /></td></tr>`;
+                            popupContent += `<tr><td>${prop}</td><td><input type="number" step="0.1" name="${prop}" value="${feature.properties[prop]}" /></td></tr>`;
 
                         } else {
                             popupContent += `<tr><td>${prop}</td><td><input type="text" disabled name="${prop}" value="${feature.properties[prop]}" /></td></tr>`;
@@ -553,7 +563,7 @@
                         popupContent += `<tr><td>${prop}</td><td><input type="text" disabled name="${prop}" value="${feature.properties[prop]}" /></td></tr>`;
                     } else if (prop == 'stroke-width' || prop == 'stroke-opacity' || prop == 'fill-opacity') {
 
-                        popupContent += `<tr><td>${prop}</td><td><input type="text" name="${prop}" value="${feature.properties[prop]}" /></td></tr>`;
+                        popupContent += `<tr><td>${prop}</td><td><input type="number" step="0.1" name="${prop}" value="${feature.properties[prop]}" /></td></tr>`;
 
                     } else {
                         popupContent += `<tr><td>${prop}</td><td><input type="text" disabled name="${prop}" value="${feature.properties[prop]}" /></td></tr>`;

@@ -9,10 +9,6 @@ require_once("../phpmailer/exception.php");
 require_once("../phpmailer/credenciais.php");
 require_once("./function.php");
 
-echo('<pre>');
-print_r($GLOBALS);
-exit;
-
 $nome = filter_input(INPUT_POST, 'nome');
 $email = filter_input(INPUT_POST, 'email');
 $telefone = filter_input(INPUT_POST, 'telefone');
