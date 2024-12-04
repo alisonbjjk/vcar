@@ -120,6 +120,19 @@
                                 <option value="Formatadas">Formatadas (PDF e Excel) - Maior lentidão </option>
                             </select>
                         </div>
+                        <div class="col-12 mb-3 row m-0 p-0">
+                            <div class="col-6">
+                                <label for="curvaNivel" class="form-label text-uppercase">Resolução das Curvas de Nível
+                                    (CNs)</label>
+                                <input class="form-control" type="number" step="0.1" min="0" id="curvaNivel"
+                                    name="curvaNivel" value="">
+                            </div>
+                            <div class="col-6">
+                                <label for="cota" class="form-label text-uppercase">Campo com as Cota das CNs</label>
+                                <input class="form-control" type="number" step="1" min="0" id="cota" name="cota"
+                                    value="">
+                            </div>
+                        </div>
                         <div id="camadas" class="m-0 p-0" count="1">
                             <div class="row justify-content-between align-self-center border rounded p-3 m-2" id="div-1"
                                 id="1" count="1">
@@ -273,7 +286,8 @@
                         <option value="Declividades 25 a 44°">Declividades entre 25° e 45°</option>
                         <option value="Empreendimento">Empreendimento</option>
                         <option value="RLs em Condomínio">RLs em Condomínio</option>
-                        <option value="Subestação de Energia Elétrica">Subestação de Energia Elétrica</option>
+                        <option value="Subestação de Energia Elétrica">Subestação de Energia Elétrica
+                        </option>
                         <option value="Supressão DVFL">DVFL</option>
                         <option value="Supressão Estágio Avançado">Estágio Avançado</option>
                         <option value="Supressão Estágio Inicial">Estágio Inicial</option>
@@ -402,104 +416,87 @@
                     try {
                         zip.loadAsync(file)
                             .then(function (zip) {
-                                var shpFile, dbfFile, prjFile;
+                                var shpFiles = [];
+                                var dbfFiles = [];
+                                var prjFiles = {};
 
                                 // Identificar os arquivos necessários
                                 zip.forEach(function (relativePath, file) {
                                     if (relativePath.endsWith('.shp')) {
-                                        shpFile = file;
+                                        shpFiles.push(file);
                                     } else if (relativePath.endsWith('.dbf')) {
-                                        dbfFile = file;
+                                        dbfFiles.push(file);
                                     } else if (relativePath.endsWith('.prj')) {
-                                        prjFile = file;
+                                        const baseName = relativePath.split('.').slice(0, -1).join('.');
+                                        prjFiles[baseName] = file;
                                     }
                                 });
 
-                                if (shpFile && dbfFile) {
-                                    // Ler os arquivos do ZIP
-                                    Promise.all([
-                                        shpFile.async('arraybuffer'),
-                                        dbfFile.async('arraybuffer'),
-                                        prjFile ? prjFile.async('string') : Promise.resolve(null)
-                                    ])
-                                        .then(function (results) {
-                                            var shpData = new Uint8Array(results[0]);
-                                            var dbfData = new Uint8Array(results[1]);
-                                            var prjData = results[2]; // Dados do arquivo .prj (se disponível)
+                                if (shpFiles.length && dbfFiles.length) {
+                                    // Processar cada conjunto de arquivos SHP/DBF
+                                    shpFiles.forEach(function (shpFile) {
+                                        const baseName = shpFile.name.split('.').slice(0, -1).join('.');
+                                        const dbfFile = dbfFiles.find(f => f.name.startsWith(baseName));
+                                        const prjFile = prjFiles[baseName] || null;
 
-                                            // Parse dos dados
-                                            var geojson = shp.combine([
-                                                shp.parseShp(shpData),
-                                                shp.parseDbf(dbfData)
-                                            ]);
+                                        if (dbfFile) {
+                                            Promise.all([
+                                                shpFile.async('arraybuffer'),
+                                                dbfFile.async('arraybuffer'),
+                                                prjFile ? prjFile.async('string') : Promise.resolve(null)
+                                            ])
+                                                .then(function (results) {
+                                                    var shpData = new Uint8Array(results[0]);
+                                                    var dbfData = new Uint8Array(results[1]);
+                                                    var prjData = results[2];
 
-                                            if (prjData) {
-                                                // O conteúdo de prjData contém a definição da projeção.
-                                                const prj = prjData.trim();  // Remover espaços extras do arquivo .prj
-                                                // Defina a projeção de origem usando Proj4js
-                                                const sourceProjection = proj4(prj);
-                                                // Defina a projeção de destino (WGS 84)
-                                                const wgs84 = proj4('EPSG:4326');  // WGS 84
-                                                // Agora, você pode converter as coordenadas do GeoJSON usando a projeção de origem e destino
-                                                geojson.features.forEach(function (feature) {
-                                                    // Verifique se a geometria está presente
-                                                    if (feature.geometry && feature.geometry.coordinates) {
-                                                        const coords = feature.geometry.coordinates;
-                                                        // Verifique o tipo de geometria e trate conforme necessário
-                                                        if (feature.geometry.type === 'Point') {
-                                                            // Para geometria de ponto, apenas verifica as 2 primeiras coordenadas (latitude, longitude)
-                                                            if (Number.isFinite(coords[0]) && Number.isFinite(coords[1])) {
-                                                                feature.geometry.coordinates = proj4(sourceProjection, wgs84, coords);
-                                                            } else {
-                                                                console.warn('Coordenada inválida encontrada no ponto:', coords);
+                                                    var geojson = shp.combine([
+                                                        shp.parseShp(shpData),
+                                                        shp.parseDbf(dbfData)
+                                                    ]);
+
+                                                    if (prjData) {
+                                                        const sourceProjection = proj4(prjData.trim());
+                                                        const wgs84 = proj4('EPSG:4326');
+                                                        geojson.features.forEach(function (feature) {
+                                                            if (feature.geometry && feature.geometry.coordinates) {
+                                                                feature.geometry.coordinates = reprojectCoordinates(
+                                                                    feature.geometry.coordinates,
+                                                                    sourceProjection,
+                                                                    wgs84
+                                                                );
                                                             }
-                                                        } else if (feature.geometry.type === 'Polygon' || feature.geometry.type === 'MultiPolygon') {
-                                                            // Para polígonos e multipolígonos, itere sobre as coordenadas
-                                                            feature.geometry.coordinates = coords.map(function (ring) {
-                                                                // Para cada "ring" (anel), verificamos as coordenadas
-                                                                return ring.map(function (coord) {
-                                                                    if (Number.isFinite(coord[0]) && Number.isFinite(coord[1])) {
-                                                                        return proj4(sourceProjection, wgs84, coord);
-                                                                    } else {
-                                                                        console.warn('Coordenada inválida encontrada no polígono:', coord);
-                                                                        return coord;  // Ou substitua com um valor padrão ou ignore
-                                                                    }
-                                                                });
-                                                            });
-                                                        } else {
-                                                            // Se a geometria for outro tipo (ex: linha, multiponto, etc.), trate conforme necessário
-                                                            console.warn('Geometria desconhecida:', feature.geometry.type);
-                                                        }
-                                                    } else {
-                                                        console.warn('Geometria ou coordenadas ausentes na feature:', feature);
+                                                        });
                                                     }
+
+                                                    // Atualizar propriedades
+                                                    geojson.features.forEach(function (feature) {
+                                                        feature.properties.id = id;
+                                                        feature.properties.tipo = tipo;
+                                                        feature.properties.nome = nome;
+                                                        if (!feature.properties.fill) {
+                                                            feature.properties.fill = "#008000";
+                                                            feature.properties.stroke = "#008000";
+                                                            feature.properties['stroke-width'] = 2;
+                                                            feature.properties['stroke-opacity'] = 1;
+                                                            feature.properties['fill-opacity'] = 0.3;
+                                                        }
+                                                    });
+
+                                                    montarLayer(geojson, id);
+                                                    $(`#nomeCamada${id}`).attr("disabled", true);
+                                                    $(`#tipo${id}`).attr("disabled", true);
+                                                    $(`#file${id}`).attr("disabled", true);
+                                                })
+                                                .catch(function (error) {
+                                                    console.error(`Erro ao processar arquivos do conjunto ${baseName}:`, error);
                                                 });
-                                            }
-
-                                            // Atualizar propriedades
-                                            geojson.features.forEach(function (feature) {
-                                                feature.properties.id = id;
-                                                feature.properties.tipo = tipo;
-                                                feature.properties.nome = nome;
-                                                if (!feature.properties.fill) {
-                                                    feature.properties.fill = "#008000";
-                                                    feature.properties.stroke = "#008000";
-                                                    feature.properties['stroke-width'] = 2;
-                                                    feature.properties['stroke-opacity'] = 1;
-                                                    feature.properties['fill-opacity'] = 0.3;
-                                                }
-                                            });
-
-                                            montarLayer(geojson, id);
-                                            $(`#nomeCamada${id}`).attr("disabled", true);
-                                            $(`#tipo${id}`).attr("disabled", true);
-                                            $(`#file${id}`).attr("disabled", true);
-                                        })
-                                        .catch(function (error) {
-                                            console.error('Erro ao ler arquivos:', error);
-                                        });
+                                        } else {
+                                            console.warn(`Arquivo DBF correspondente não encontrado para ${shpFile.name}`);
+                                        }
+                                    });
                                 } else {
-                                    alert('Arquivo Shapefile ou DBF ausente');
+                                    alert('Nenhum conjunto SHP/DBF válido encontrado');
                                 }
                             })
                             .catch(function (error) {
@@ -512,15 +509,14 @@
                     // Função para reprojetar coordenadas
                     function reprojectCoordinates(coords, sourceProj, targetProj) {
                         if (!Array.isArray(coords[0])) {
-                            // Coordenada única
                             return proj4(sourceProj, targetProj, coords);
                         } else {
-                            // Coordenadas aninhadas (ex. Polígonos ou Multi-pontos)
                             return coords.map(function (innerCoords) {
                                 return reprojectCoordinates(innerCoords, sourceProj, targetProj);
                             });
                         }
                     }
+
                 } else {
                     $(`#file${id}`).val("");
                     Swal.fire({
@@ -580,7 +576,7 @@
                             popupContent += `<tr><td>${prop}</td><td><input type="text" disabled name="${prop}" value="${feature.properties[prop]}" /></td></tr>`;
 
                         } else if (prop == 'stroke-width' || prop == 'stroke-opacity' || prop == 'fill-opacity') {
-                            popupContent += `<tr><td>${prop}</td><td><input type="text" name="${prop}" value="${feature.properties[prop]}" /></td></tr>`;
+                            popupContent += `<tr><td>${prop}</td><td><input type="number" step="0.1" name="${prop}" value="${feature.properties[prop]}" /></td></tr>`;
 
                         } else {
                             popupContent += `<tr><td>${prop}</td><td><input type="text" disabled name="${prop}" value="${feature.properties[prop]}" /></td></tr>`;
@@ -656,7 +652,7 @@
                         popupContent += `<tr><td>${prop}</td><td><input type="text" disabled name="${prop}" value="${feature.properties[prop]}" /></td></tr>`;
                     } else if (prop == 'stroke-width' || prop == 'stroke-opacity' || prop == 'fill-opacity') {
 
-                        popupContent += `<tr><td>${prop}</td><td><input type="text" name="${prop}" value="${feature.properties[prop]}" /></td></tr>`;
+                        popupContent += `<tr><td>${prop}</td><td><input type="number" step="0.1" name="${prop}" value="${feature.properties[prop]}" /></td></tr>`;
 
                     } else {
                         popupContent += `<tr><td>${prop}</td><td><input type="text" disabled name="${prop}" value="${feature.properties[prop]}" /></td></tr>`;
