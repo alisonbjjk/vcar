@@ -308,6 +308,7 @@
         function abrirFiles(e, id, teste) {
             var nome = $(`#nomeCamada${id}`).val();
             var tipo = $(`#tipo${id}`).val();
+
             for (var x in drawnItems._layers) {
                 var geojson = drawnItems._layers[x].toGeoJSON();
                 if (geojson.type == 'FeatureCollection') {
@@ -358,13 +359,11 @@
                             arr[i].properties['stroke-width'] = 2;
                             arr[i].properties['stroke-opacity'] = 1;
                             arr[i].properties['fill-opacity'] = 0.3;
+                            arr[i].properties['hachura'] = "Não";
                         }
                         geojson.features.push(arr[i]);
                     }
                     montarLayer(geojson, id);
-                    $(`#nomeCamada${id}`).attr("disabled", true);
-                    $(`#tipo${id}`).attr("disabled", true);
-                    $(`#file${id}`).attr("disabled", true);
                 } else if (extFile == 'kmz') {
                     const kmzFile = file;
                     const jszip = new JSZip();
@@ -394,14 +393,12 @@
                                             feature.properties['stroke-width'] = 2;
                                             feature.properties['stroke-opacity'] = 1;
                                             feature.properties['fill-opacity'] = 0.3;
+                                            arr[i].properties['hachura'] = "Não";
+
                                         }
                                     });
 
                                     montarLayer(geojson, id);
-                                    $(`#nomeCamada${id}`).attr("disabled", true);
-                                    $(`#tipo${id}`).attr("disabled", true);
-                                    $(`#file${id}`).attr("disabled", true);
-
                                     // Aqui você pode fazer o que quiser com o GeoJSON (exibir no mapa, etc.)
                                 })
                                 .catch(function (err) {
@@ -480,13 +477,11 @@
                                                             feature.properties['stroke-width'] = 2;
                                                             feature.properties['stroke-opacity'] = 1;
                                                             feature.properties['fill-opacity'] = 0.3;
+                                                            arr[i].properties['hachura'] = "Não";
                                                         }
                                                     });
 
                                                     montarLayer(geojson, id);
-                                                    $(`#nomeCamada${id}`).attr("disabled", true);
-                                                    $(`#tipo${id}`).attr("disabled", true);
-                                                    $(`#file${id}`).attr("disabled", true);
                                                 })
                                                 .catch(function (error) {
                                                     console.error(`Erro ao processar arquivos do conjunto ${baseName}:`, error);
@@ -543,6 +538,7 @@
                     feature.properties['fill-opacity'] ? fillOpacity = feature.properties['fill-opacity'] : fillOpacity = feature.properties['fill-opa'];
                     feature.properties['stroke-opacity'] ? strokeOpacity = feature.properties['stroke-opacity'] : strokeOpacity = feature.properties['stroke-o'];
                     feature.properties['stroke-width'] ? strokeWidth = feature.properties['stroke-width'] : strokeWidth = feature.properties['stroke-w'];
+                    feature.properties['hachura'] ? hachura = feature.properties['hachura'] : hachura = feature.properties['hachura'];
 
                     // var hachura = new L.StripePattern({
                     //     angle: 45,
@@ -578,6 +574,12 @@
                         } else if (prop == 'stroke-width' || prop == 'stroke-opacity' || prop == 'fill-opacity') {
                             popupContent += `<tr><td>${prop}</td><td><input type="number" step="0.1" name="${prop}" value="${feature.properties[prop]}" /></td></tr>`;
 
+                        } else if (prop == 'hachura') {
+                            if (feature.properties[prop] == 'Não') {
+                                popupContent += `<tr><td>${prop}</td><td><input type="text" disabled name="${prop}" value="${feature.properties[prop]}" /></td></tr>`;
+                            } else {
+                                popupContent += `<tr><td>${prop}</td><td><input type="text" disabled name="${prop}" value="${feature.properties[prop]}" /></td></tr>`;
+                            }
                         } else {
                             popupContent += `<tr><td>${prop}</td><td><input type="text" disabled name="${prop}" value="${feature.properties[prop]}" /></td></tr>`;
                         }
@@ -598,6 +600,9 @@
             map.fitBounds(bounds);
             var center = bounds.getCenter();
             map.panTo(center);
+            $(`#nomeCamada${id}`).attr("disabled", true);
+            $(`#tipo${id}`).attr("disabled", true);
+            $(`#file${id}`).attr("disabled", true);
         }
 
         function testeform(select, id) {
