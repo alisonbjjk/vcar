@@ -359,7 +359,12 @@
                             arr[i].properties['stroke-width'] = 2;
                             arr[i].properties['stroke-opacity'] = 1;
                             arr[i].properties['fill-opacity'] = 0.3;
-                            arr[i].properties['hachura'] = "Não";
+                            arr[i].properties['angulo'] = 45;
+                            arr[i].properties['largura'] = 4;
+
+                            if (arr[i].geometry.type == "Polygon") {
+                                arr[i].properties['hachura'] = "Não";
+                            }
                         }
                         geojson.features.push(arr[i]);
                     }
@@ -393,7 +398,11 @@
                                             feature.properties['stroke-width'] = 2;
                                             feature.properties['stroke-opacity'] = 1;
                                             feature.properties['fill-opacity'] = 0.3;
-                                            arr[i].properties['hachura'] = "Não";
+                                            feature.properties['angulo'] = 45;
+                                            feature.properties['largura'] = 4;
+                                            if (feature.geometry.type == "Polygon") {
+                                                arr[i].properties['hachura'] = "Não";
+                                            }
 
                                         }
                                     });
@@ -477,7 +486,11 @@
                                                             feature.properties['stroke-width'] = 2;
                                                             feature.properties['stroke-opacity'] = 1;
                                                             feature.properties['fill-opacity'] = 0.3;
-                                                            arr[i].properties['hachura'] = "Não";
+                                                            feature.properties['angulo'] = 45;
+                                                            feature.properties['largura'] = 4;
+                                                            if (feature.geometry.type == "Polygon") {
+                                                                arr[i].properties['hachura'] = "Não";
+                                                            }
                                                         }
                                                     });
 
@@ -533,22 +546,13 @@
 
             geojsonLayer.eachLayer(function (layer) {
                 feature = layer.feature
-
                 if (feature.properties['fill']) {
                     feature.properties['fill-opacity'] ? fillOpacity = feature.properties['fill-opacity'] : fillOpacity = feature.properties['fill-opa'];
                     feature.properties['stroke-opacity'] ? strokeOpacity = feature.properties['stroke-opacity'] : strokeOpacity = feature.properties['stroke-o'];
                     feature.properties['stroke-width'] ? strokeWidth = feature.properties['stroke-width'] : strokeWidth = feature.properties['stroke-w'];
                     feature.properties['hachura'] ? hachura = feature.properties['hachura'] : hachura = feature.properties['hachura'];
-
-                    // var hachura = new L.StripePattern({
-                    //     angle: 45,
-                    //     weight: 3,
-                    //     spaceWeight: 4,
-                    //     color: 'red',
-                    //     opacity: 1
-                    // });
-                    // hachura.addTo(map);
-                    // console.log(hachura);
+                    feature.properties['angulo'] ? angulo = feature.properties['angulo'] : angulo = feature.properties['angulo'];
+                    feature.properties['largura'] ? largura = feature.properties['largura'] : largura = feature.properties['largura'];
 
                     if (feature.geometry.type != 'Point') {
                         layer.setStyle({
@@ -557,7 +561,6 @@
                             color: feature.properties.stroke,
                             width: strokeWidth,
                             opacity: strokeOpacity,
-                            // fillPattern: hachura
                         })
                     }
                 }
@@ -574,11 +577,24 @@
                         } else if (prop == 'stroke-width' || prop == 'stroke-opacity' || prop == 'fill-opacity') {
                             popupContent += `<tr><td>${prop}</td><td><input type="number" step="0.1" name="${prop}" value="${feature.properties[prop]}" /></td></tr>`;
 
+                        } else if (prop == 'angulo') {
+                        } else if (prop == 'largura') {
                         } else if (prop == 'hachura') {
                             if (feature.properties[prop] == 'Não') {
-                                popupContent += `<tr><td>${prop}</td><td><input type="text" disabled name="${prop}" value="${feature.properties[prop]}" /></td></tr>`;
+                                popupContent += `<tr><td>${prop}</td><td>
+
+                                    <select onchange="ativaHachura(this, ${feature.properties.id}, ${feature.properties.angulo}, ${feature.properties.largura});" class="form-control form-select-sm" id="hachura_${feature.properties.id}" name='hachura_${feature.properties.id}'>
+                                        <option value='Sim'>Sim</option>
+                                        <option value='Não' selected>Não</option>
+                                    </select>                                    
+                                    </td></tr>`;
                             } else {
-                                popupContent += `<tr><td>${prop}</td><td><input type="text" disabled name="${prop}" value="${feature.properties[prop]}" /></td></tr>`;
+                                popupContent += `<tr><td>${prop}</td><td>
+                                        <select onchange="ativaHachura(this, ${feature.properties.id}, ${feature.properties.angulo}, ${feature.properties.largura});" class="form-control form-select-sm" id="hachura_${feature.properties.id}" name='hachura_${feature.properties.id}'>
+                                            <option value='Sim' selected>Sim</option>
+                                            <option value='Não'>Não</option>
+                                        </select>                                    
+                                    </td></tr>`;
                             }
                         } else {
                             popupContent += `<tr><td>${prop}</td><td><input type="text" disabled name="${prop}" value="${feature.properties[prop]}" /></td></tr>`;
@@ -605,8 +621,40 @@
             $(`#file${id}`).attr("disabled", true);
         }
 
+        function ativaHachura(element, id, angulo, largura) {
+            const value = element.value;
+
+            angulo == undefined ? 0 : angulo;
+            angulo   
+
+            if (element.value == 'Sim') {
+                for (let i = 0; i < 2; i++) {
+                    const currentRow = element.closest('tr');
+                    const newRow = document.createElement('tr');
+
+                    const cell1 = document.createElement('td');
+                    const cell2 = document.createElement('td');
+                    if (i == 0) {
+                        cell1.innerHTML = 'Ângulo';
+                        cell2.innerHTML = `<input type="number" step="0.1" id="angulo_${id}" name="angulo" value="${angulo}" />`;
+                    }
+                    else if (i == 1) {
+                        cell1.innerHTML = 'Largura Hachura';
+                        cell2.innerHTML = `<input type="number" step="0.1" id="largura_${id}" name="largura" value="${largura}" />`;
+
+                    }
+                    newRow.appendChild(cell1);
+                    newRow.appendChild(cell2);
+
+                    currentRow.parentNode.insertBefore(newRow, currentRow.nextSibling);
+                }
+            }
+        }
+
         function testeform(select, id) {
             var inputs = document.querySelectorAll(`#table_${id} input`);
+            var hachuraValor = $(`#hachura_${id}`).find(":selected").val();
+            // var 
             var dataObject = {};
 
             // Itera sobre os inputs e coleta os valores
@@ -614,12 +662,26 @@
                 dataObject[input.name] = input.value; // Usa o name como chave
             });
 
+
+            if (hachuraValor == 'Sim') {
+                var hachura = new L.StripePattern({
+                    angle: dataObject['angulo'],
+                    weight: dataObject['largura'],
+                    color: dataObject['fill'],
+                    opacity: dataObject['fill-opacity'],
+                });
+                hachura.addTo(map);
+            } else {
+                var hachura = null;
+            }
+
             var newStyle = {
                 color: dataObject['stroke'],
                 weight: dataObject['stroke-width'],
                 opacity: dataObject['stroke-opacity'],
                 fillColor: dataObject['fill'],
                 fillOpacity: dataObject['fill-opacity'],
+                fillPattern: hachura
             }
 
             // Modificar style
@@ -633,7 +695,9 @@
                         feature.properties['stroke-opacity'] = newStyle.opacity;
                         feature.properties['fill'] = newStyle.fillColor;
                         feature.properties['fill-opacity'] = newStyle.fillOpacity;
-
+                        feature.properties['hachura'] = hachuraValor;
+                        feature.properties['angulo'] = dataObject['angulo'] == undefined ? feature.properties['angulo'] : dataObject['angulo'];
+                        feature.properties['largura'] = dataObject['largura'] == undefined ? feature.properties['largura'] : dataObject['largura'];
                         attPopUp(layer, feature)
                     });
                 }
@@ -641,7 +705,7 @@
 
         }
 
-        function attPopUp(layer, feature) {
+        function attPopUp(layer, feature) {            
             var popupContent = `<table id="table_${feature.properties.id}" class="table table-striped table-bordered p-0 m-0" style="width:100%">`;
             for (var prop in feature.properties) {
                 if (prop != 'id') {
@@ -656,9 +720,33 @@
                     } else if (prop == 'nome' || prop == 'tipo') {
                         popupContent += `<tr><td>${prop}</td><td><input type="text" disabled name="${prop}" value="${feature.properties[prop]}" /></td></tr>`;
                     } else if (prop == 'stroke-width' || prop == 'stroke-opacity' || prop == 'fill-opacity') {
-
                         popupContent += `<tr><td>${prop}</td><td><input type="number" step="0.1" name="${prop}" value="${feature.properties[prop]}" /></td></tr>`;
+                    } else if (prop == 'angulo' && feature.properties.hachura == 'Sim') {
 
+                        popupContent += `<tr><td>${prop}</td><td><input type="number" step="1.0" name="${prop}" value="${feature.properties[prop]}" /></td></tr>`;
+                    } else if (prop == 'angulo' && feature.properties.hachura == 'Não') {
+
+                    } else if (prop == 'largura' && feature.properties.hachura == 'Sim') {
+
+                        popupContent += `<tr><td>${prop}</td><td><input type="number" step="1.0" name="${prop}" value="${feature.properties[prop]}" /></td></tr>`;
+                    } else if (prop == 'largura' && feature.properties.hachura == 'Não') {
+
+                    } else if (prop == 'hachura') {
+                        if (feature.properties[prop] == 'Não') {
+                            popupContent += `<tr><td>${prop}</td><td>
+                                    <select onchange="ativaHachura(this, ${feature.properties.id}, ${feature.properties.angulo}, ${feature.properties.largura});" class="form-control form-select-sm" id="hachura_${feature.properties.id}" name='hachura_${feature.properties.id}'>
+                                        <option value='Sim'>Sim</option>
+                                        <option value='Não' selected>Não</option>
+                                    </select>                                    
+                                    </td></tr>`;
+                        } else {
+                            popupContent += `<tr><td>${prop}</td><td>
+                                        <select onchange="ativaHachura(this, ${feature.properties.id}, ${feature.properties.angulo}, ${feature.properties.largura});" class="form-control form-select-sm" id="hachura_${feature.properties.id}" name='hachura_${feature.properties.id}'>
+                                            <option value='Sim' selected>Sim</option>
+                                            <option value='Não'>Não</option>
+                                        </select>                                    
+                                    </td></tr>`;
+                        }
                     } else {
                         popupContent += `<tr><td>${prop}</td><td><input type="text" disabled name="${prop}" value="${feature.properties[prop]}" /></td></tr>`;
                     }
