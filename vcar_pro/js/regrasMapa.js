@@ -28,7 +28,7 @@ const search = new window.GeoSearch.GeoSearchControl({
 });
 
 map.addControl(search);
-$(".geosearch").addClass("active");
+// $(".geosearch").addClass("active");
 // Fim criarMapa
 
 // localizacaoAtual
