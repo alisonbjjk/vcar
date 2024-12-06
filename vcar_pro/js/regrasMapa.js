@@ -58,14 +58,20 @@ function localAtual() {
 $("#tipoMapa").on("change", "", function (e) {
     let num = $("#tipoMapa").val();
 
+    map.eachLayer(function (layer) {
+        // Verifica se a camada é do tipo TileLayer
+        if (layer instanceof L.TileLayer) {
+            map.removeLayer(layer); // Remove a camada
+        }
+    });
+
     var baselayer = new L.TileLayer(basemaps[num]['tilelayer'], {
         minZoom: basemaps[num]['minZoom'],
         maxZoom: basemaps[num]['maxZoom'],
         attribution: basemaps[num]['attribution']
     });
 
-    map.addLayer(baselayer);
-    limites();
+    baselayer.setZIndex(-1).addTo(map);
 });
 // Fim mudarMapa
 

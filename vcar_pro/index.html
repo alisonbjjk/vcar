@@ -151,7 +151,8 @@
                                 <div class="col-3">
                                     <label for="tipo1" class="form-label text-uppercase">Tipo da camada <label
                                             class="text-danger">*</label></label>
-                                    <select id="tipo1" class="form-select" aria-label="Default select example">
+                                    <select onchange="ativaCurvaNivel(this, 1)" id="tipo1" class="form-select"
+                                        aria-label="Default select example">
                                         <option value="Análise Geral" selected>Análise Geral</option>
                                         <option value="Aceiros">Aceiros</option>
                                         <option value="Aerogeradores">Aerogeradores</option>
@@ -279,7 +280,7 @@
                 </div>
                 <div class="col-3">
                     <label for="tipo${count}" class="form-label text-uppercase">Tipo da camada <label class="text-danger">*</label></label>
-                    <select id="tipo${count}" class="form-select" aria-label="Default select example">
+                    <select onchange="ativaCurvaNivel(this, ${count})" id="tipo${count}" class="form-select" aria-label="Default select example">
                         <option value="Análise Geral" selected>Análise Geral</option>
                         <option value="Aceiros">Aceiros</option>
                         <option value="Aerogeradores">Aerogeradores</option>
@@ -307,10 +308,38 @@
             `);
         }
 
+        function bloquear(id) {
+            $(`#nomeCamada${id}`).attr("disabled", true);
+            $(`#tipo${id}`).attr("disabled", true);
+            $(`#file${id}`).attr("disabled", true);
+
+            if ($(`#tipo${id}`).val() == 'Curvas de Nível') {
+                $(`#curvaNivel-${id}`).attr("disabled", true);
+                $(`#cota-${id}`).attr("disabled", true);
+            }
+        }
+
+        function desbloquear(id) {
+            $(`#nomeCamada${id}`).attr("disabled", false);
+            $(`#tipo${id}`).attr("disabled", false);
+            $(`#file${id}`).attr("disabled", false);
+
+            if ($(`#tipo${id}`).val() == 'Curvas de Nível') {
+                $(`#curvaNivel-${id}`).attr("disabled", false);
+                $(`#cota-${id}`).attr("disabled", false);
+            }
+        }
+
         // Inicio BuscaFile
         function abrirFiles(e, id, teste) {
+            bloquear(id);
             var nome = $(`#nomeCamada${id}`).val();
             var tipo = $(`#tipo${id}`).val();
+
+            if (tipo == 'Curvas de Nível') {
+                var curva = $(`#curvaNivel-${id}`).val();
+                var cota = $(`#cota-${id}`).val();
+            }
 
             for (var x in drawnItems._layers) {
                 var geojson = drawnItems._layers[x].toGeoJSON();
@@ -324,6 +353,8 @@
                                 title: "Oops...",
                                 text: "Não é permitido adicionar camadas com nomes e tipos duplicados!",
                             });
+                            desbloquear(id)
+                            $(`#file${id}`).val(null);
                             return;
                         }
                     }
@@ -331,7 +362,12 @@
             }
 
             if (tipo == null) {
-                alert(`Inserir Tipo da Camada.\nErro: cod(${id}).`);
+                Swal.fire({
+                    icon: "error",
+                    title: "Oops...",
+                    text: `Inserir Tipo da Camada.\nErro: cod(${id}).`,
+                });
+                desbloquear(id)
                 $(`#file${id}`).val(null);
                 return;
             }
@@ -356,18 +392,21 @@
                         arr[i].properties.id = id
                         arr[i].properties.tipo = tipo
                         arr[i].properties.nome = nome
+                        if (tipo == 'Curvas de Nível') {
+                            arr[i].properties.curva = curva;
+                            arr[i].properties.cota = cota;
+                        }
                         if (!arr[i].properties.fill) {
                             arr[i].properties.fill = "#008000";
                             arr[i].properties.stroke = "#008000";
                             arr[i].properties['stroke-width'] = 2;
                             arr[i].properties['stroke-opacity'] = 1;
                             arr[i].properties['fill-opacity'] = 0.3;
+                        }
+                        if (arr[i].geometry.type == "Polygon") {
+                            arr[i].properties['hachura'] = "Não";
                             arr[i].properties['angulo'] = 45;
                             arr[i].properties['largura'] = 4;
-
-                            if (arr[i].geometry.type == "Polygon") {
-                                arr[i].properties['hachura'] = "Não";
-                            }
                         }
                         geojson.features.push(arr[i]);
                     }
@@ -381,6 +420,8 @@
                             const kmlFile = zip.file(/\.kml$/i); // Normalmente, há um único arquivo KML no KMZ
                             if (kmlFile.length === 0) {
                                 console.error("Não foi encontrado nenhum arquivo KML no KMZ");
+                                desbloquear(id)
+                                $(`#file${id}`).val(null);
                                 return;
                             }
 
@@ -395,18 +436,21 @@
                                         feature.properties.id = id;
                                         feature.properties.tipo = tipo;
                                         feature.properties.nome = nome;
+                                        if (tipo == 'Curvas de Nível') {
+                                            feature.properties.curva = curva;
+                                            feature.properties.cota = cota;
+                                        }
                                         if (!feature.properties.fill) {
                                             feature.properties.fill = "#008000";
                                             feature.properties.stroke = "#008000";
                                             feature.properties['stroke-width'] = 2;
                                             feature.properties['stroke-opacity'] = 1;
                                             feature.properties['fill-opacity'] = 0.3;
+                                        }
+                                        if (feature.geometry.type == "Polygon") {
+                                            arr[i].properties['hachura'] = "Não";
                                             feature.properties['angulo'] = 45;
                                             feature.properties['largura'] = 4;
-                                            if (feature.geometry.type == "Polygon") {
-                                                arr[i].properties['hachura'] = "Não";
-                                            }
-
                                         }
                                     });
 
@@ -414,10 +458,14 @@
                                     // Aqui você pode fazer o que quiser com o GeoJSON (exibir no mapa, etc.)
                                 })
                                 .catch(function (err) {
+                                    desbloquear(id)
+                                    $(`#file${id}`).val(null);
                                     console.error('Erro ao processar o arquivo KML:', err);
                                 });
                         })
                         .catch(function (err) {
+                            desbloquear(id)
+                            $(`#file${id}`).val(null);
                             console.error('Erro ao descompactar o KMZ:', err);
                         });
                 } else if (extFile == 'zip') {
@@ -462,7 +510,13 @@
                                 await processZipContent(zip);
 
                                 if (!shpFiles.length || !dbfFiles.length) {
-                                    alert('Nenhum conjunto SHP/DBF válido encontrado');
+                                    Swal.fire({
+                                        icon: "error",
+                                        title: "Oops...",
+                                        text: 'Nenhum conjunto SHP/DBF válido encontrado',
+                                    });
+                                    desbloquear(id)
+                                    $(`#file${id}`).val(null);
                                     return;
                                 }
 
@@ -473,6 +527,8 @@
                                     const prjEntry = prjFiles[baseName] || null;
 
                                     if (!dbfEntry) {
+                                        desbloquear(id)
+                                        $(`#file${id}`).val(null);
                                         console.warn(`Arquivo DBF correspondente não encontrado para ${shpPath}`);
                                         continue;
                                     }
@@ -480,14 +536,20 @@
                                     try {
                                         await processFileSet(shpFile, dbfEntry.file, prjEntry ? prjEntry.file : null, id);
                                     } catch (error) {
+                                        desbloquear(id)
+                                        $(`#file${id}`).val(null);
                                         console.error(`Erro ao processar arquivos do conjunto ${baseName}:`, error);
                                     }
                                 }
                             })
                             .catch(error => {
+                                desbloquear(id)
+                                $(`#file${id}`).val(null);
                                 console.error('Erro ao ler arquivo ZIP:', error);
                             });
                     } catch (error) {
+                        desbloquear(id)
+                        $(`#file${id}`).val(null);
                         console.error('Erro ao carregar o arquivo ZIP:', error);
                     }
 
@@ -523,11 +585,18 @@
                     // Função para melhorar as propriedades dos recursos GeoJSON
                     function enhanceFeatures(features) {
                         features.forEach(feature => {
+                            if (tipo == 'Curvas de Nível') {
+                            } else {
+                                curva = ''
+                                cota = ''
+                            }
                             feature.properties = {
                                 ...feature.properties,
                                 id: id,
                                 tipo: tipo,
                                 nome: nome,
+                                curva: curva,
+                                cota: cota,
                                 fill: feature.properties.fill || "#008000",
                                 stroke: feature.properties.stroke || "#008000",
                                 'stroke-width': 2,
@@ -552,7 +621,8 @@
 
 
                 } else {
-                    $(`#file${id}`).val("");
+                    desbloquear(id)
+                    $(`#file${id}`).val(null);
                     Swal.fire({
                         icon: "error",
                         title: "Oops...",
@@ -657,10 +727,30 @@
             map.fitBounds(bounds);
             var center = bounds.getCenter();
             map.panTo(center);
-            $(`#nomeCamada${id}`).attr("disabled", true);
-            $(`#tipo${id}`).attr("disabled", true);
-            $(`#file${id}`).attr("disabled", true);
         }
+
+        function ativaCurvaNivel(element, id) {
+            const value = element.value;
+            if (value == 'Curvas de Nível') {
+                $(`#div-${id}`).append(`                   
+                <div class="col-12 mb-3 mt-2 row m-0 p-0" id="divCurva-${id}">
+                    <div class="col-6">
+                        <label for="curvaNivel" class="form-label text-uppercase">Curvas de Nível
+                            (CNs)</label>
+                        <input class="form-control" type="number" step="0.1" min="0" id="curvaNivel-${id}"
+                            name="curvaNivel-${id}" value="">
+                    </div>
+                    <div class="col-6">
+                        <label for="cota" class="form-label text-uppercase">Cota das CNs</label>
+                        <input class="form-control" type="number" step="1" min="0" id="cota-${id}" name="cota-${id}"
+                            value="">
+                    </div>
+                </div>`);
+            } else {
+                $(`#divCurva-${id}`).remove();
+            }
+        }
+
 
         function ativaHachura(element, id, angulo, largura) {
             const value = element.value;
