@@ -337,7 +337,7 @@
             const camadaConfig = valoresCamadas.find(camada => camada.Camada === tipo);
             console.log(camadaConfig.Tipo);
 
-            
+
             arr.forEach((feature) => {
                 feature.properties.id = id;
                 feature.properties.tipo = tipo;
@@ -362,7 +362,7 @@
                         feature.properties.angulo = 45;
                         feature.properties.largura = 4;
                     }
-                } else {                    
+                } else {
                     if (feature.properties.fill) {
                         feature.properties.fill = "#008000";
                         feature.properties.stroke = "#008000";
@@ -371,10 +371,10 @@
                         feature.properties['fill-opacity'] = 0.3;
                     } else {
 
-                        if(camadaConfig.Tipo == 'Sólido'){
+                        if (camadaConfig.Tipo == 'Sólido') {
                             console.log('1', camadaConfig);
                             console.log('1', tipo);
-                            
+
                             feature.properties.fill = camadaConfig.Hexadecimal;
                             feature.properties['fill-opacity'] = .45;
 
@@ -685,6 +685,8 @@
 
             geojsonLayer.eachLayer(function (layer) {
                 feature = layer.feature
+                console.log(feature.properties);
+
                 if (feature.properties['fill']) {
                     feature.properties['fill-opacity'] ? fillOpacity = feature.properties['fill-opacity'] : fillOpacity = feature.properties['fill-opa'];
                     feature.properties['stroke-opacity'] ? strokeOpacity = feature.properties['stroke-opacity'] : strokeOpacity = feature.properties['stroke-o'];
