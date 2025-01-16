@@ -159,7 +159,7 @@
                                         <option value="ANM">ANM</option>
                                         <option value="APPs de Declividades">APPs de Declividades</option>
                                         <option value="Curvas de Nível">Curvas de Nível</option>
-                                        <option value="Declividades 25 a 44°">Declividades entre 25° e 45°</option>
+                                        <option value="Declividades 25 a 45">Declividades entre 25° e 45°</option>
                                         <option value="Empreendimento">Empreendimento</option>
                                         <option value="RLs em Condomínio">RLs em Condomínio</option>
                                         <option value="Subestação de Energia Elétrica">Subestação de Energia Elétrica
@@ -247,6 +247,7 @@
     <script src="https://unpkg.com/terraformer@1.0.8"></script>
     <script src="https://unpkg.com/terraformer-arcgis-parser@1.0.5"></script>
     <script src="https://unpkg.com/terraformer-wkt-parser@1.1.2"></script>
+    <script src="./js/json.js"></script>
     <script>
 
         function removeCamadas(camada) {
@@ -287,7 +288,7 @@
                         <option value="ANM">ANM</option>
                         <option value="APPs de Declividades">APPs de Declividades</option>
                         <option value="Curvas de Nível">Curvas de Nível</option>
-                        <option value="Declividades 25 a 44°">Declividades entre 25° e 45°</option>
+                        <option value="Declividades 25 a 45">Declividades entre 25° e 45°</option>
                         <option value="Empreendimento">Empreendimento</option>
                         <option value="RLs em Condomínio">RLs em Condomínio</option>
                         <option value="Subestação de Energia Elétrica">Subestação de Energia Elétrica
@@ -328,6 +329,75 @@
                 $(`#curvaNivel-${id}`).attr("disabled", false);
                 $(`#cota-${id}`).attr("disabled", false);
             }
+        }
+
+        function processGeojsonFeatures(arr, geojson, id, tipo, nome, curva = null, cota = null) {
+
+            console.log(tipo);
+            const camadaConfig = valoresCamadas.find(camada => camada.Camada === tipo);
+            console.log(camadaConfig.Tipo);
+
+            
+            arr.forEach((feature) => {
+                feature.properties.id = id;
+                feature.properties.tipo = tipo;
+                feature.properties.nome = nome;
+
+                if (tipo === 'Curvas de Nível') {
+                    feature.properties.curva = curva;
+                    feature.properties.cota = cota;
+                }
+
+                if (!camadaConfig) {
+                    if (!feature.properties.fill) {
+                        feature.properties.fill = "#008000";
+                        feature.properties.stroke = "#008000";
+                        feature.properties['stroke-width'] = 2;
+                        feature.properties['stroke-opacity'] = 1;
+                        feature.properties['fill-opacity'] = 0.3;
+                    }
+
+                    if (feature.geometry.type === "Polygon") {
+                        feature.properties.hachura = "Não";
+                        feature.properties.angulo = 45;
+                        feature.properties.largura = 4;
+                    }
+                } else {                    
+                    if (feature.properties.fill) {
+                        feature.properties.fill = "#008000";
+                        feature.properties.stroke = "#008000";
+                        feature.properties['stroke-width'] = 2;
+                        feature.properties['stroke-opacity'] = 1;
+                        feature.properties['fill-opacity'] = 0.3;
+                    } else {
+
+                        if(camadaConfig.Tipo == 'Sólido'){
+                            console.log('1', camadaConfig);
+                            console.log('1', tipo);
+                            
+                            feature.properties.fill = camadaConfig.Hexadecimal;
+                            feature.properties['fill-opacity'] = .45;
+
+                            feature.properties.stroke = camadaConfig.Hexadecimal;
+                            feature.properties['stroke-width'] = camadaConfig.LarguraContorno;
+                            feature.properties['stroke-opacity'] = 0;
+                        }
+
+                        // console.log(camadaConfig);
+                    }
+                    if (feature.geometry.type === "Polygon") {
+                        if (camadaConfig.Tipo == 'Hashtag') {
+
+                        } else {
+                            feature.properties.hachura = "Não";
+                            feature.properties.angulo = 45;
+                            feature.properties.largura = 4;
+                        }
+                    }
+                }
+
+                geojson.features.push(feature);
+            });
         }
 
         // Inicio BuscaFile
@@ -388,29 +458,10 @@
                 if (extFile == 'kml') {
                     var kmlImport = toGeoJSON.kml(new DOMParser().parseFromString(fr.result, "text/xml"));
                     var arr = kmlImport.features;
-                    for (var i = 0; i < arr.length; i++) {
-                        arr[i].properties.id = id
-                        arr[i].properties.tipo = tipo
-                        arr[i].properties.nome = nome
-                        if (tipo == 'Curvas de Nível') {
-                            arr[i].properties.curva = curva;
-                            arr[i].properties.cota = cota;
-                        }
-                        if (!arr[i].properties.fill) {
-                            arr[i].properties.fill = "#008000";
-                            arr[i].properties.stroke = "#008000";
-                            arr[i].properties['stroke-width'] = 2;
-                            arr[i].properties['stroke-opacity'] = 1;
-                            arr[i].properties['fill-opacity'] = 0.3;
-                        }
-                        if (arr[i].geometry.type == "Polygon") {
-                            arr[i].properties['hachura'] = "Não";
-                            arr[i].properties['angulo'] = 45;
-                            arr[i].properties['largura'] = 4;
-                        }
-                        geojson.features.push(arr[i]);
-                    }
+
+                    processGeojsonFeatures(arr, geojson, id, tipo, nome, curva, cota);
                     montarLayer(geojson, id);
+
                 } else if (extFile == 'kmz') {
                     const kmzFile = file;
                     const jszip = new JSZip();
@@ -432,28 +483,7 @@
                                     const kml = new DOMParser().parseFromString(kmlData, 'text/xml');
                                     const geojson = toGeoJSON.kml(kml); // Converte KML para GeoJSON
 
-                                    geojson.features.forEach(function (feature) {
-                                        feature.properties.id = id;
-                                        feature.properties.tipo = tipo;
-                                        feature.properties.nome = nome;
-                                        if (tipo == 'Curvas de Nível') {
-                                            feature.properties.curva = curva;
-                                            feature.properties.cota = cota;
-                                        }
-                                        if (!feature.properties.fill) {
-                                            feature.properties.fill = "#008000";
-                                            feature.properties.stroke = "#008000";
-                                            feature.properties['stroke-width'] = 2;
-                                            feature.properties['stroke-opacity'] = 1;
-                                            feature.properties['fill-opacity'] = 0.3;
-                                        }
-                                        if (feature.geometry.type == "Polygon") {
-                                            arr[i].properties['hachura'] = "Não";
-                                            feature.properties['angulo'] = 45;
-                                            feature.properties['largura'] = 4;
-                                        }
-                                    });
-
+                                    processGeojsonFeatures(geojson.features, geojson, id, tipo, nome, curva, cota);
                                     montarLayer(geojson, id);
                                     // Aqui você pode fazer o que quiser com o GeoJSON (exibir no mapa, etc.)
                                 })
@@ -578,7 +608,9 @@
                             });
                         }
 
-                        enhanceFeatures(geojson.features);
+                        processGeojsonFeatures(geojson.features, geojson, id, tipo, nome, curva, cota);
+
+                        // enhanceFeatures(geojson.features);
                         montarLayer(geojson, id);
                     }
 

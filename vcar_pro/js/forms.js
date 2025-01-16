@@ -43,6 +43,26 @@ $("#enviar").on("click", function () {
         var center = groupBounds.getCenter();
         map.setView(center, map.getZoom());
 
+        function updateSpecificProperties(geoJSON) {
+            geoJSON.features.forEach(feature => {
+                const properties = feature.properties;
+                const keysToUpdate = ["angulo", "fill-opacity", "fill", "hachura", "id", "largura", "nome", "stroke-opacity", "stroke-width", "stroke", "tipo"];
+                const updatedProperties = {};
+
+                for (const key in properties) {
+                    if (keysToUpdate.includes(key)) {
+                        updatedProperties[`${key}_vcar`] = properties[key];
+                    } else {
+                        updatedProperties[key] = properties[key];
+                    }
+                }
+
+                feature.properties = updatedProperties;
+            });
+            return geoJSON;
+        }
+        
+        var collection = updateSpecificProperties(collection);
         var myForm = document.getElementById('frm');
         var dados = new FormData(myForm);
         var blob = new Blob([JSON.stringify(collection)], { type: "application/json" });
